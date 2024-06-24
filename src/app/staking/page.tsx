@@ -24,7 +24,8 @@ const StakingPage = () => {
 
   const { balance: mineBalance, loadBalance: loadMineBalance } =
     useMineBalanceOf(address);
-  const { positions: stakePositions } = useStakePositionsOf(address);
+  const { positions: stakePositions, loadPositions: loadStakePositions } =
+    useStakePositionsOf(address);
 
   return (
     <>
@@ -53,22 +54,41 @@ const StakingPage = () => {
               <TableColumn>Claimed Reward</TableColumn>
             </TableHeader>
             <TableBody>
-              {stakePositions.map((position, ind) => (
-                <TableRow key={ind}>
-                  <TableCell>#{position.tokenId}</TableCell>
-                  <TableCell>{position.nftType}</TableCell>
-                  <TableCell>{position.buyPrice}</TableCell>
-                  <TableCell>
-                    {formatDate(new Date(position.stakedTimestamp)).date}{" "}
-                    {formatDate(new Date(position.stakedTimestamp)).time}
+              {stakePositions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} aria-colspan={6}>
+                    No Staked NFTs
                   </TableCell>
-                  <TableCell>
-                    {formatDate(new Date(position.latestClaimedTimestamp)).date}{" "}
-                    {formatDate(new Date(position.latestClaimedTimestamp)).time}
-                  </TableCell>
-                  <TableCell>{position.claimedRewards}</TableCell>
+                  <TableCell className="hidden">d</TableCell>
+                  <TableCell className="hidden">d</TableCell>
+                  <TableCell className="hidden">d</TableCell>
+                  <TableCell className="hidden">d</TableCell>
+                  <TableCell className="hidden">d</TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                stakePositions.map((position, ind) => (
+                  <TableRow key={ind}>
+                    <TableCell>#{position.tokenId}</TableCell>
+                    <TableCell>{position.nftType}</TableCell>
+                    <TableCell>{position.buyPrice}</TableCell>
+                    <TableCell>
+                      {formatDate(new Date(position.stakedTimestamp)).date}{" "}
+                      {formatDate(new Date(position.stakedTimestamp)).time}
+                    </TableCell>
+                    <TableCell>
+                      {
+                        formatDate(new Date(position.latestClaimedTimestamp))
+                          .date
+                      }{" "}
+                      {
+                        formatDate(new Date(position.latestClaimedTimestamp))
+                          .time
+                      }
+                    </TableCell>
+                    <TableCell>{position.claimedRewards}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
@@ -76,7 +96,10 @@ const StakingPage = () => {
       <StakeModal
         open={stakeModalOpen}
         setOpen={setStakeModalOpen}
-        onStakeCompleted={loadMineBalance}
+        onStakeCompleted={() => {
+          loadMineBalance();
+          loadStakePositions();
+        }}
       />
     </>
   );
