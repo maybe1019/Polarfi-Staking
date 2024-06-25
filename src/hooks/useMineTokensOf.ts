@@ -64,7 +64,6 @@ const useMineTokensOf = (address?: string) => {
     }
 
     const tokenIds = await getMineTokenIdsOf(address);
-    console.log(tokenIds);
     const typeIds = await getMineTokenTypeIds(tokenIds);
 
     const _tokens: IMineToken[] = [];
