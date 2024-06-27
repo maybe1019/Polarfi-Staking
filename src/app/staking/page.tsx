@@ -1,7 +1,11 @@
 "use client";
 
 import StakeModal from "@/components/common/stake-modal";
-import { ContractABIs, ContractAddresses } from "@/config/constants";
+import {
+  ContractABIs,
+  ContractAddresses,
+  DependencyDelayTime,
+} from "@/config/constants";
 import useMineBalanceOf from "@/hooks/useMineBalanceOf";
 import useStakePositionsOf from "@/hooks/useStakePositionsOf";
 import { formatDate } from "@/lib/utils";
@@ -15,24 +19,36 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
+import { getClaimableRewards } from "@/hooks/useClaimableRewards";
+import { IStakeReward } from "@/types";
+import RewardModal from "@/components/common/reward-modal";
 
 const StakingPage = () => {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
 
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
+  const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [unstaking, setUnstaking] = useState(false);
+  const [rewards, setRewards] = useState<IStakeReward[]>([]);
+  const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
 
   const { balance: mineBalance, loadBalance: loadMineBalance } =
     useMineBalanceOf(address);
   const { positions: stakePositions, loadPositions: loadStakePositions } =
     useStakePositionsOf(address);
 
-  const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
+  const loadRewards = useCallback(async () => {
+    setRewards(await getClaimableRewards(stakePositions.map((p) => p.tokenId)));
+  }, [stakePositions]);
+
+  useEffect(() => {
+    loadRewards();
+  }, [loadRewards]);
 
   const handleUnstake = async () => {
     setUnstaking(true);
@@ -77,21 +93,23 @@ const StakingPage = () => {
 
         <div className="mb-2 h-10 flex items-center justify-between">
           <span>Total Staked: {stakePositions.length} NFTs</span>
-          {selectedTokenIds.length > 0 && (
-            <div>
-              <Button
-                color="danger"
-                onClick={handleUnstake}
-                isLoading={unstaking}
-              >
-                {unstaking
-                  ? "Unstaking..."
-                  : `Unstake ${selectedTokenIds.length} NFT${
-                      selectedTokenIds.length > 1 ? "s" : ""
-                    }`}
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-3">
+            <Button
+              color="primary"
+              isDisabled={selectedTokenIds.length === 0}
+              onClick={() => setClaimModalOpen(true)}
+            >
+              Claim
+            </Button>
+            <Button
+              color="danger"
+              onClick={handleUnstake}
+              isLoading={unstaking}
+              isDisabled={selectedTokenIds.length === 0}
+            >
+              {unstaking ? "Unstaking..." : `Unstake`}
+            </Button>
+          </div>
         </div>
         <div>
           <Table
@@ -124,13 +142,21 @@ const StakingPage = () => {
               <TableColumn>Staked At</TableColumn>
               <TableColumn>Last Claim</TableColumn>
               <TableColumn>Claimed Reward</TableColumn>
+              <TableColumn>Claimable Reward</TableColumn>
+              <TableColumn>LPR</TableColumn>
             </TableHeader>
             <TableBody>
               {stakePositions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} aria-colspan={6}>
+                  <TableCell
+                    colSpan={9}
+                    aria-colspan={6}
+                    className="text-center py-20 text-stone-400"
+                  >
                     No Staked NFTs
                   </TableCell>
+                  <TableCell className="hidden">d</TableCell>
+                  <TableCell className="hidden">d</TableCell>
                   <TableCell className="hidden">d</TableCell>
                   <TableCell className="hidden">d</TableCell>
                   <TableCell className="hidden">d</TableCell>
@@ -176,6 +202,17 @@ const StakingPage = () => {
                       }
                     </TableCell>
                     <TableCell>{position.claimedRewards}</TableCell>
+                    <TableCell>
+                      {rewards
+                        .find((r) => r.tokenId === position.tokenId)
+                        ?.reward.toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      {
+                        rewards.find((r) => r.tokenId === position.tokenId)
+                          ?.currentLPR
+                      }
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -190,6 +227,21 @@ const StakingPage = () => {
           loadMineBalance();
           loadStakePositions();
         }}
+      />
+      <RewardModal
+        open={claimModalOpen}
+        setOpen={setClaimModalOpen}
+        onStakeCompleted={loadRewards}
+        rewards={(() => {
+          const res: IStakeReward[] = [];
+          for (const tokenId of selectedTokenIds) {
+            const r = rewards.find((rw) => rw.tokenId === tokenId);
+            if (r) {
+              res.push(r);
+            }
+          }
+          return res;
+        })()}
       />
     </>
   );

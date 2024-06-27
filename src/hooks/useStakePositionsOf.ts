@@ -13,6 +13,7 @@ import { formatEther } from "viem";
 export const getStakePositionsOf = async (staker: string) => {
   try {
     const tokenIds = await getStakedTokenIdsOf(staker);
+    console.log("tokenids", tokenIds);
 
     let context: any[] = tokenIds.map((tokenId) => ({
       address: ContractAddresses.Staking,

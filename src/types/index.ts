@@ -19,3 +19,9 @@ export interface IStakePosition {
   claimedRewards: number;
   isStaked: boolean;
 }
+
+export interface IStakeReward {
+  tokenId: number;
+  reward: number;
+  currentLPR: number;
+}

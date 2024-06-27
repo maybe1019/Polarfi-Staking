@@ -7,7 +7,11 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Input } from "@nextui-org/react";
 import useTokenAllowance from "@/hooks/useTokenAllowance";
-import { ContractABIs, ContractAddresses, MineTypeCount } from "@/config/constants";
+import {
+  ContractABIs,
+  ContractAddresses,
+  MineTypeCount,
+} from "@/config/constants";
 import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { parseEther } from "viem";

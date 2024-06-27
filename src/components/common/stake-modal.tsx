@@ -39,7 +39,6 @@ const StakeModal = ({ open, setOpen, onStakeCompleted }: Props) => {
         address,
         ContractAddresses.Staking
       );
-      console.log("allowance", address, ContractAddresses.Staking, allowance);
       if (!allowance) {
         setBtnLabel("Approving...");
         const txHash = await writeContractAsync({

@@ -35,7 +35,9 @@ const Header = () => {
         ))}
       </nav>
       {tokenBalance?.value !== undefined && (
-        <div className="hidden lg:block">Balance: {tokenBalance?.formatted} $FROST</div>
+        <div className="hidden lg:block">
+          Balance: {Number(tokenBalance?.formatted).toLocaleString()} $FROST
+        </div>
       )}
       <button
         onClick={() => open()}

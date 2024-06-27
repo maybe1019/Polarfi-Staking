@@ -23,24 +23,12 @@ export const wagmiConfig = defaultWagmiConfig({
   projectId: ProjectId,
   metadata,
   ssr: true,
-  storage: createStorage({
-    storage: cookieStorage,
-  }),
+  transports: {
+    [sepolia.id]: http(
+      "https://eth-sepolia.g.alchemy.com/v2/7oTRdRbWxZOti6Od9k7lSyJJbTS7XYIE"
+    ),
+    [mainnet.id]: http(),
+  },
 });
 
-const config =
-  AppMode === AppModes.Development
-    ? createConfig({
-        chains: [sepolia],
-        transports: {
-          [sepolia.id]: http(),
-        },
-      })
-    : createConfig({
-        chains: [mainnet],
-        transports: {
-          [mainnet.id]: http(),
-        },
-      });
-
-export const wagmiClient = getPublicClient(config);
+export const wagmiClient = getPublicClient(wagmiConfig);

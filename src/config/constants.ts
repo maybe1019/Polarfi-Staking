@@ -30,3 +30,5 @@ export const ContractABIs = {
 export const DependencyDelayTime = 200;
 
 export const MineTypeCount = 6;
+
+export const MaxLPR = 100;
