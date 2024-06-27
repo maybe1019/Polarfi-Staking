@@ -31,4 +31,12 @@ export const wagmiConfig = defaultWagmiConfig({
   },
 });
 
-export const wagmiClient = getPublicClient(wagmiConfig);
+const publicClient = () => {
+  const client = getPublicClient(wagmiConfig);
+  if (!client) {
+    throw new Error("Invalid Client");
+  }
+  return client;
+};
+
+export const wagmiClient = publicClient();

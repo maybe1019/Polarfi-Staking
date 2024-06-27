@@ -5,6 +5,7 @@ import {
   ContractABIs,
   ContractAddresses,
   DependencyDelayTime,
+  TransactionConfirmBlockCount,
 } from "@/config/constants";
 import useMineBalanceOf from "@/hooks/useMineBalanceOf";
 import useStakePositionsOf from "@/hooks/useStakePositionsOf";
@@ -63,7 +64,7 @@ const StakingPage = () => {
 
       await waitForTransactionReceipt(wagmiConfig, {
         chainId: MainChain.id,
-        confirmations: 1,
+        confirmations: TransactionConfirmBlockCount,
         hash,
       });
 
@@ -72,8 +73,11 @@ const StakingPage = () => {
         loadMineBalance();
         loadStakePositions();
       }, 3000);
-    } catch (error) {
-      console.error("handleUnstake", error);
+    } catch (error: any) {
+      console.error(
+        "handleUnstake",
+        Object.keys(error).map((key) => error[key])
+      );
     }
 
     setUnstaking(false);
@@ -231,7 +235,10 @@ const StakingPage = () => {
       <RewardModal
         open={claimModalOpen}
         setOpen={setClaimModalOpen}
-        onStakeCompleted={loadRewards}
+        onStakeCompleted={() => {
+          loadRewards();
+          loadStakePositions();
+        }}
         rewards={(() => {
           const res: IStakeReward[] = [];
           for (const tokenId of selectedTokenIds) {

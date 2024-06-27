@@ -1,4 +1,8 @@
-import { ContractABIs, ContractAddresses } from "@/config/constants";
+import {
+  ContractABIs,
+  ContractAddresses,
+  TransactionConfirmBlockCount,
+} from "@/config/constants";
 import { getMineAllowance } from "@/hooks/useMineAllowance";
 import useMineTokensOf from "@/hooks/useMineTokensOf";
 import { Icon } from "@iconify/react/dist/iconify.js";
@@ -49,7 +53,7 @@ const StakeModal = ({ open, setOpen, onStakeCompleted }: Props) => {
         });
         await waitForTransactionReceipt(wagmiConfig, {
           chainId: MainChain.id,
-          confirmations: 1,
+          confirmations: TransactionConfirmBlockCount,
           hash: txHash,
         });
       }
@@ -63,7 +67,7 @@ const StakeModal = ({ open, setOpen, onStakeCompleted }: Props) => {
       });
       await waitForTransactionReceipt(wagmiConfig, {
         chainId: MainChain.id,
-        confirmations: 1,
+        confirmations: TransactionConfirmBlockCount,
         hash: txHash,
       });
 

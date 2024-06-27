@@ -11,6 +11,7 @@ import {
   ContractABIs,
   ContractAddresses,
   MineTypeCount,
+  TransactionConfirmBlockCount,
 } from "@/config/constants";
 import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
@@ -52,7 +53,7 @@ export default function Home() {
         });
         await waitForTransactionReceipt(wagmiConfig, {
           chainId: MainChain.id,
-          confirmations: 2,
+          confirmations: TransactionConfirmBlockCount,
           hash: txHash,
         });
         loadAllowance();
@@ -69,7 +70,7 @@ export default function Home() {
 
       await waitForTransactionReceipt(wagmiConfig, {
         chainId: MainChain.id,
-        confirmations: 2,
+        confirmations: TransactionConfirmBlockCount,
         hash,
       });
 

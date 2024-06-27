@@ -11,7 +11,7 @@ import { IStakeReward } from "@/types";
 import { useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
-import { ContractABIs, ContractAddresses } from "@/config/constants";
+import { ContractABIs, ContractAddresses, TransactionConfirmBlockCount } from "@/config/constants";
 
 type Props = {
   rewards: IStakeReward[];
@@ -35,7 +35,7 @@ const RewardModal = ({ rewards, open, setOpen, onStakeCompleted }: Props) => {
       });
       await waitForTransactionReceipt(wagmiConfig, {
         chainId: MainChain.id,
-        confirmations: 1,
+        confirmations: TransactionConfirmBlockCount,
         hash: txHash,
       });
 

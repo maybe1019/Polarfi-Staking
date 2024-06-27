@@ -32,3 +32,5 @@ export const DependencyDelayTime = 200;
 export const MineTypeCount = 6;
 
 export const MaxLPR = 100;
+
+export const TransactionConfirmBlockCount = 1;
