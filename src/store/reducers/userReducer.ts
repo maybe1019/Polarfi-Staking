@@ -6,7 +6,7 @@ import {
 import { getStakePositions } from "@/lib/contracts/staking";
 import { IStakePosition } from "@/types";
 import { LoadingStatus } from "@/types/enums";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { getMinerBalancesOf } from "@/lib/contracts/miner";
 
@@ -36,13 +36,18 @@ const initialState: UserState = {
 
 export const loadUserMinesThunk = createAsyncThunk(
   "loadUserMinesThunk",
-  async (address: string | undefined, { rejectWithValue, getState }) => {
+  async (
+    { address, tokenIds }: { address?: string; tokenIds?: number[] },
+    { rejectWithValue, getState }
+  ) => {
     try {
       if (!address) {
         return [];
       }
 
-      const tokenIds = await getMineTokenIdsOf(address);
+      if (tokenIds === undefined) {
+        tokenIds = await getMineTokenIdsOf(address);
+      }
       const tokenTypes = await getMineTokenTypeIds(tokenIds);
       const stakingPositions = await getStakePositions(tokenIds);
 
@@ -52,7 +57,7 @@ export const loadUserMinesThunk = createAsyncThunk(
         if (p.nftType === 0) {
           p.nftType = tokenTypes[i];
           p.user = address;
-          p.tokenId = tokenIds[i];
+          p.tokenId = tokenIds ? tokenIds[i] : 0;
           p.buyPrice = prices[tokenTypes[i]].price;
         }
       });
@@ -76,7 +81,6 @@ export const loadUserMinerBalancesThunk = createAsyncThunk(
         return [];
       }
       const balances = await getMinerBalancesOf(address, tokenIds);
-      console.log(balances);
       return balances;
     } catch (error) {
       console.error("loadUserMinerBalancesThunk", error);
@@ -117,14 +121,29 @@ export const addNewMinesThunk = createAsyncThunk(
 export const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    removeNFTs: (state, action: PayloadAction<number[]>) => {
+      state.mines.data = state.mines.data.filter(
+        (n) => !action.payload.includes(n.tokenId)
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loadUserMinesThunk.pending, (state) => {
         state.mines.status = LoadingStatus.Loading;
       })
       .addCase(loadUserMinesThunk.fulfilled, (state, action) => {
-        state.mines.data = action.payload;
+        action.payload.forEach((s) => {
+          const tokenIds = state.mines.data.map((s) => s.tokenId);
+          if (tokenIds.includes(s.tokenId)) {
+            state.mines.data = state.mines.data.filter(
+              (d) => d.tokenId !== s.tokenId
+            );
+          }
+          state.mines.data.push(s);
+        });
+        // state.mines.data = action.payload;
         state.mines.status = LoadingStatus.Fulfilled;
       })
       .addCase(loadUserMinesThunk.rejected, (state) => {
@@ -145,7 +164,7 @@ export const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const {} = userSlice.actions;
+export const { removeNFTs } = userSlice.actions;
 
 const userReducer = userSlice.reducer;
 

@@ -19,7 +19,7 @@ const Template = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     const timerId = setTimeout(() => {
-      dispatch(loadUserMinesThunk(address));
+      dispatch(loadUserMinesThunk({ address }));
       dispatch(loadUserMinerBalancesThunk({ address }));
     }, DependencyDelayTime);
 

@@ -57,7 +57,7 @@ export const getMineBalanceOf = async (owner: string) => {
 
     return Number(res);
   } catch (error) {
-    console.log("getMineBalanceOf", error);
+    console.error("getMineBalanceOf", error);
     throw error;
   }
 };
@@ -73,7 +73,7 @@ export const getMineTotalSupply = async () => {
 
     return Number(res);
   } catch (error) {
-    console.log("getMineBalanceOf", error);
+    console.error("getMineBalanceOf", error);
     throw error;
   }
 };
@@ -151,7 +151,7 @@ export const getMinePrice = async (typeId: number) => {
 
     return Number(formatEther(BigInt(res)));
   } catch (error) {
-    console.log("getMinePrice", error);
+    console.error("getMinePrice", error);
     throw error;
   }
 };

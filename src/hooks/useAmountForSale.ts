@@ -17,7 +17,7 @@ export const getAmountForSale = async (typeId: number) => {
 
     return Number(res);
   } catch (error) {
-    console.log("getAmountForSale", error);
+    console.error("getAmountForSale", error);
     throw error;
   }
 };

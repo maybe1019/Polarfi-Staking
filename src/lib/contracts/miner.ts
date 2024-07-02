@@ -60,7 +60,7 @@ export const getMinerBalanceOf = async (owner: string, typeId: number) => {
 
     return Number(res);
   } catch (error) {
-    console.log("getMinerBalanceOf", error);
+    console.error("getMinerBalanceOf", error);
     throw error;
   }
 };
@@ -89,8 +89,6 @@ export const getMinerBalancesOf = async (
     contracts: context,
   });
 
-  console.log("res", res);
-
   return res.map((r, i) => ({
     tokenId: tokenIds[i],
     balance: Number(r?.result || "0"),
@@ -108,7 +106,7 @@ export const getMinerPrice = async (typeId: number) => {
 
     return Number(formatEther(BigInt(res)));
   } catch (error) {
-    console.log("getMinerPrice", error);
+    console.error("getMinerPrice", error);
     throw error;
   }
 };

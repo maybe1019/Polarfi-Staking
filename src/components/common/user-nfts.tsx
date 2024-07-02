@@ -5,7 +5,7 @@ import {
 } from "@/config/constants";
 import { getMineAllowance } from "@/lib/contracts/mine";
 import { formatDate } from "@/lib/utils";
-import { RootState } from "@/store";
+import { RootState, useAppDispatch } from "@/store";
 import { LoadingStatus } from "@/types/enums";
 import {
   Button,
@@ -23,8 +23,10 @@ import { useSelector } from "react-redux";
 import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
+import { removeNFTs } from "@/store/reducers/userReducer";
 
 const UserNFTs = () => {
+  const dispatch = useAppDispatch();
   const userMines = useSelector((state: RootState) => state.user.mines);
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
@@ -67,6 +69,9 @@ const UserNFTs = () => {
         confirmations: TransactionConfirmBlockCount,
         hash: txHash,
       });
+
+      dispatch(removeNFTs(selectedTokenIds));
+      setSelectedTokenIds([]);
     } catch (error) {
       console.error("handleStake", error);
     }
@@ -147,55 +152,61 @@ const UserNFTs = () => {
               <TableCell className="hidden">d</TableCell>
             </TableRow>
           ) : (
-            userMines.data.map((mine, ind) => (
-              <TableRow key={ind}>
-                <TableCell>
-                  <Checkbox
-                    isSelected={selectedTokenIds.includes(mine.tokenId)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTokenIds((prev) => [...prev, mine.tokenId]);
-                      } else {
-                        setSelectedTokenIds((prev) =>
-                          prev.filter((t) => t !== mine.tokenId)
-                        );
-                      }
-                    }}
-                  ></Checkbox>
-                </TableCell>
-                <TableCell>#{mine.tokenId}</TableCell>
-                <TableCell>{mine.nftType}</TableCell>
-                <TableCell>{mine.buyPrice}</TableCell>
-                <TableCell>
-                  {mine.stakedTimestamp === 0
-                    ? "-"
-                    : `${formatDate(new Date(mine.stakedTimestamp)).date} ${
-                        formatDate(new Date(mine.stakedTimestamp)).time
-                      }`}
-                </TableCell>
-                <TableCell>
-                  {mine.claimedRewards === 0
-                    ? "-"
-                    : `${
-                        formatDate(new Date(mine.latestClaimedTimestamp)).date
-                      } ${
-                        formatDate(new Date(mine.latestClaimedTimestamp)).time
-                      }`}
-                </TableCell>
-                <TableCell>{mine.claimedRewards}</TableCell>
-                <TableCell
-                  className={
-                    mine.latestLpr === 0
-                      ? "text-danger"
-                      : mine.latestLpr < 80
-                      ? "text-primary"
-                      : "text-success"
-                  }
-                >
-                  {mine.latestLpr / 100}
-                </TableCell>
-              </TableRow>
-            ))
+            userMines.data
+              .map((a) => a)
+              .sort((a, b) => a.tokenId - b.tokenId)
+              .map((mine, ind) => (
+                <TableRow key={ind}>
+                  <TableCell>
+                    <Checkbox
+                      isSelected={selectedTokenIds.includes(mine.tokenId)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTokenIds((prev) => [
+                            ...prev,
+                            mine.tokenId,
+                          ]);
+                        } else {
+                          setSelectedTokenIds((prev) =>
+                            prev.filter((t) => t !== mine.tokenId)
+                          );
+                        }
+                      }}
+                    ></Checkbox>
+                  </TableCell>
+                  <TableCell>#{mine.tokenId}</TableCell>
+                  <TableCell>{mine.nftType}</TableCell>
+                  <TableCell>{mine.buyPrice}</TableCell>
+                  <TableCell>
+                    {mine.stakedTimestamp === 0
+                      ? "-"
+                      : `${formatDate(new Date(mine.stakedTimestamp)).date} ${
+                          formatDate(new Date(mine.stakedTimestamp)).time
+                        }`}
+                  </TableCell>
+                  <TableCell>
+                    {mine.claimedRewards === 0
+                      ? "-"
+                      : `${
+                          formatDate(new Date(mine.latestClaimedTimestamp)).date
+                        } ${
+                          formatDate(new Date(mine.latestClaimedTimestamp)).time
+                        }`}
+                  </TableCell>
+                  <TableCell>{mine.claimedRewards}</TableCell>
+                  <TableCell
+                    className={
+                      mine.latestLpr === 0
+                        ? "text-danger"
+                        : mine.latestLpr < 80
+                        ? "text-primary"
+                        : "text-success"
+                    }
+                  >
+                    {mine.latestLpr / 100}
+                  </TableCell>
+                </TableRow>
+              ))
           )}
         </TableBody>
       </Table>

@@ -25,19 +25,19 @@ import { MainChain, wagmiConfig } from "@/config/web3.config";
 import { getClaimableRewards } from "@/hooks/useClaimableRewards";
 import { IStakeReward } from "@/types";
 import RewardModal from "@/components/common/reward-modal";
+import { useAppDispatch } from "@/store";
+import { loadUserMinesThunk } from "@/store/reducers/userReducer";
 
 const StakingPage = () => {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const dispatch = useAppDispatch();
 
-  const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [unstaking, setUnstaking] = useState(false);
   const [rewards, setRewards] = useState<IStakeReward[]>([]);
   const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
 
-  const { balance: mineBalance, loadBalance: loadMineBalance } =
-    useMineBalanceOf(address);
   const { positions: stakePositions, loadPositions: loadStakePositions } =
     useStakePositionsOf(address);
 
@@ -66,9 +66,9 @@ const StakingPage = () => {
         hash,
       });
 
+      dispatch(loadUserMinesThunk({ address, tokenIds: selectedTokenIds }));
       setSelectedTokenIds([]);
       setTimeout(() => {
-        loadMineBalance();
         loadStakePositions();
       }, 3000);
     } catch (error: any) {
