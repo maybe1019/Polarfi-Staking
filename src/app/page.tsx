@@ -57,14 +57,6 @@ export default function Home() {
     ContractAddresses.Mine
   );
 
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      dispatch(loadMineInfoThunk([]));
-    }, DependencyDelayTime);
-
-    return () => clearTimeout(timerId);
-  }, [dispatch]);
-
   const handleMint = async () => {
     const cnt = Number(count);
     if (!address) {

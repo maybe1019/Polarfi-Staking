@@ -8,11 +8,16 @@ import { IStakePosition } from "@/types";
 import { LoadingStatus } from "@/types/enums";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "..";
+import { getMinerBalancesOf } from "@/lib/contracts/miner";
 
 export interface UserState {
   value: number;
   mines: {
     data: IStakePosition[];
+    status: LoadingStatus;
+  };
+  miners: {
+    balances: number[];
     status: LoadingStatus;
   };
 }
@@ -21,6 +26,10 @@ const initialState: UserState = {
   value: 0,
   mines: {
     data: [],
+    status: LoadingStatus.NotStarted,
+  },
+  miners: {
+    balances: new Array(7).fill(0),
     status: LoadingStatus.NotStarted,
   },
 };
@@ -51,6 +60,26 @@ export const loadUserMinesThunk = createAsyncThunk(
       return stakingPositions;
     } catch (error) {
       console.error("loadUserMinesThunk", error);
+      return rejectWithValue("");
+    }
+  }
+);
+
+export const loadUserMinerBalancesThunk = createAsyncThunk(
+  "loadUserMinerBalancesThunk",
+  async (
+    { address, tokenIds }: { address: string | undefined; tokenIds?: number[] },
+    { rejectWithValue }
+  ) => {
+    try {
+      if (!address) {
+        return [];
+      }
+      const balances = await getMinerBalancesOf(address, tokenIds);
+      console.log(balances);
+      return balances;
+    } catch (error) {
+      console.error("loadUserMinerBalancesThunk", error);
       return rejectWithValue("");
     }
   }
@@ -104,6 +133,13 @@ export const userSlice = createSlice({
 
     builder.addCase(addNewMinesThunk.fulfilled, (state, action) => {
       state.mines.data.push(...action.payload);
+    });
+
+    builder.addCase(loadUserMinerBalancesThunk.fulfilled, (state, action) => {
+      const balances = action.payload;
+      balances.forEach((balance) => {
+        state.miners.balances[balance.tokenId] = balance.balance;
+      });
     });
   },
 });

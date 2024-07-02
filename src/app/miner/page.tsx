@@ -15,20 +15,24 @@ import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { parseEther } from "viem";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
-import useMinerPrice from "@/hooks/useMinerPrice";
-import useMinerBalanceOf from "@/hooks/useMinerBalanceOf";
+import { useSelector } from "react-redux";
+import { RootState, useAppDispatch } from "@/store";
+import { loadUserMinerBalancesThunk } from "@/store/reducers/userReducer";
 
 const MinerPage = () => {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const dispatch = useAppDispatch();
+
+  const minerBalances = useSelector(
+    (state: RootState) => state.user.miners.balances
+  );
+  const minerInfo = useSelector((state: RootState) => state.app.minerInfo);
 
   const [typeId, setTypeId] = useState(1);
   const [count, setCount] = useState("0");
   const [btnLabel, setBtnLabel] = useState("");
 
-  const { balance: minerBalance, loadBalance: loadMinerBalance } =
-    useMinerBalanceOf(address, typeId);
-  const { price } = useMinerPrice(typeId);
   const { allowanceInNumber, loadAllowance } = useTokenAllowance(
     ContractAddresses.Frost,
     address,
@@ -38,7 +42,7 @@ const MinerPage = () => {
   const handleMint = async () => {
     const cnt = Number(count);
     try {
-      if (allowanceInNumber < price * cnt) {
+      if (allowanceInNumber < minerInfo[typeId].price * cnt) {
         setBtnLabel("Approving...");
         const txHash = await writeContractAsync({
           abi: ContractABIs.Frost,
@@ -71,7 +75,7 @@ const MinerPage = () => {
         confirmations: TransactionConfirmBlockCount,
         hash,
       });
-      loadMinerBalance();
+      dispatch(loadUserMinerBalancesThunk({ address, tokenIds: [typeId] }));
     } catch (error: any) {
       console.error("handleMint", error?.message);
     }
@@ -101,8 +105,8 @@ const MinerPage = () => {
             ))}
           </div>
         </div>
-        <div>Price: {price} $FROST</div>
-        {address && <div>Balance: {minerBalance}</div>}
+        <div>Price: {minerInfo[typeId].price} $FROST</div>
+        {address && <div>Balance: {minerBalances[typeId]}</div>}
         <div className="flex items-center gap-2">
           <Button
             color="primary"
