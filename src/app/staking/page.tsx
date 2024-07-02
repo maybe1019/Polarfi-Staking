@@ -1,10 +1,8 @@
 "use client";
 
-import StakeModal from "@/components/common/stake-modal";
 import {
   ContractABIs,
   ContractAddresses,
-  DependencyDelayTime,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
 import useMineBalanceOf from "@/hooks/useMineBalanceOf";
@@ -85,16 +83,7 @@ const StakingPage = () => {
 
   return (
     <>
-      <div className="py-20 container mx-auto px-4">
-        <div className="flex items-center gap-5 mb-5">
-          <span>MINE Balance: {mineBalance}</span>
-          {mineBalance > 0 && (
-            <Button color="primary" onClick={() => setStakeModalOpen(true)}>
-              Stake
-            </Button>
-          )}
-        </div>
-
+      <div>
         <div className="mb-2 h-10 flex items-center justify-between">
           <span>Total Staked: {stakePositions.length} NFTs</span>
           <div className="flex gap-3">
@@ -224,14 +213,6 @@ const StakingPage = () => {
           </Table>
         </div>
       </div>
-      <StakeModal
-        open={stakeModalOpen}
-        setOpen={setStakeModalOpen}
-        onStakeCompleted={() => {
-          loadMineBalance();
-          loadStakePositions();
-        }}
-      />
       <RewardModal
         open={claimModalOpen}
         setOpen={setClaimModalOpen}

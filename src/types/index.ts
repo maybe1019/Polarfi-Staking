@@ -25,3 +25,14 @@ export interface IStakeReward {
   reward: number;
   currentLPR: number;
 }
+
+export interface IMineInfo {
+  typeId: number;
+  price: number;
+  amountForSale: number;
+}
+
+export interface IMinerInfo {
+  typeId: number;
+  price: number;
+}

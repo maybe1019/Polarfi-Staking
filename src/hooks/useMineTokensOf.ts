@@ -1,59 +1,7 @@
-import {
-  ContractABIs,
-  ContractAddresses,
-  DependencyDelayTime,
-} from "@/config/constants";
+import { DependencyDelayTime } from "@/config/constants";
 import { IMineToken } from "@/types";
 import { useCallback, useEffect, useState } from "react";
-import { getMineBalanceOf } from "./useMineBalanceOf";
-import { multicall } from "@wagmi/core";
-import { MainChain, wagmiConfig } from "@/config/web3.config";
-
-export const getMineTokenIdsOf = async (address: string) => {
-  try {
-    const balance = await getMineBalanceOf(address);
-    let context: any[] = new Array(balance).fill(0).map((_, index) => ({
-      address: ContractAddresses.Mine,
-      abi: ContractABIs.Mine,
-      functionName: "tokenOfOwnerByIndex",
-      args: [address, index],
-    }));
-
-    let res = await multicall(wagmiConfig, {
-      chainId: MainChain.id,
-      contracts: context,
-    });
-
-    const tokenIds: number[] = [];
-    res.forEach((v) => {
-      if (v.status === "success") tokenIds.push(Number(v.result));
-    });
-
-    return tokenIds;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getMineTokenTypeIds = async (tokenIds: number[]) => {
-  try {
-    let context: any[] = tokenIds.map((tokenId) => ({
-      address: ContractAddresses.Mine,
-      abi: ContractABIs.Mine,
-      functionName: "typeOfToken",
-      args: [tokenId],
-    }));
-
-    let res = await multicall(wagmiConfig, {
-      chainId: MainChain.id,
-      contracts: context,
-    });
-
-    return res.map((v) => Number(v.result));
-  } catch (error) {
-    throw error;
-  }
-};
+import { getMineTokenIdsOf, getMineTokenTypeIds } from "@/lib/contracts/mine";
 
 const useMineTokensOf = (address?: string) => {
   const [tokens, setTokens] = useState<IMineToken[]>([]);

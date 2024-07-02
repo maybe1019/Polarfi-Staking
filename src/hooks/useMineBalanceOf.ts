@@ -1,26 +1,6 @@
-import {
-  ContractABIs,
-  ContractAddresses,
-  DependencyDelayTime,
-} from "@/config/constants";
-import { wagmiClient } from "@/config/web3.config";
+import { DependencyDelayTime } from "@/config/constants";
+import { getMineBalanceOf } from "@/lib/contracts/mine";
 import { useCallback, useEffect, useState } from "react";
-
-export const getMineBalanceOf = async (owner: string) => {
-  try {
-    const res: any = await wagmiClient.readContract({
-      abi: ContractABIs.Mine,
-      address: ContractAddresses.Mine,
-      functionName: "balanceOf",
-      args: [owner],
-    });
-
-    return Number(res);
-  } catch (error) {
-    console.log("getMineBalanceOf", error);
-    throw error;
-  }
-};
 
 const useMineBalanceOf = (owner?: string) => {
   const [balance, setBalance] = useState(0);

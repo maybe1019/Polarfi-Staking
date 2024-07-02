@@ -4,23 +4,8 @@ import {
   DependencyDelayTime,
 } from "@/config/constants";
 import { wagmiClient } from "@/config/web3.config";
+import { getStakedTokenIdsOf } from "@/lib/contracts/staking";
 import { useCallback, useEffect, useState } from "react";
-
-export const getStakedTokenIdsOf = async (staker: string) => {
-  try {
-    const res: any = await wagmiClient.readContract({
-      abi: ContractABIs.Staking,
-      address: ContractAddresses.Staking,
-      functionName: "getStakedNFTsPerUser",
-      args: [staker],
-    });
-
-    return (res as any[]).map((d: any) => Number(d));
-  } catch (error) {
-    console.error("getStakedTokenIdsOf", error);
-    throw error;
-  }
-};
 
 const useStakedTokenIdsOf = (owner?: string) => {
   const [tokenIds, setTokenIds] = useState<number[]>([]);

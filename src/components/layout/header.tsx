@@ -9,6 +9,7 @@ import { useAccount, useBalance } from "wagmi";
 import { ContractAddresses } from "@/config/constants";
 import { MainChain } from "@/config/web3.config";
 import { shortenAddress } from "@/lib/utils";
+import { Button } from "@nextui-org/react";
 
 const Header = () => {
   const { open } = useWeb3Modal();
@@ -39,12 +40,9 @@ const Header = () => {
           Balance: {Number(tokenBalance?.formatted).toLocaleString()} $FROST
         </div>
       )}
-      <button
-        onClick={() => open()}
-        className="bg-primary rounded-lg py-3 px-10"
-      >
+      <Button onClick={() => open()} color="primary">
         {address ? shortenAddress(address) : "Connect Wallet"}
-      </button>
+      </Button>
     </header>
   );
 };
