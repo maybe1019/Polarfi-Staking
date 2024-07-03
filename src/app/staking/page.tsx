@@ -26,7 +26,11 @@ import { getClaimableRewards } from "@/hooks/useClaimableRewards";
 import { IStakeReward } from "@/types";
 import RewardModal from "@/components/common/reward-modal";
 import { useAppDispatch } from "@/store";
-import { loadUserMinesThunk } from "@/store/reducers/userReducer";
+import {
+  loadUserMinerBalancesThunk,
+  loadUserMinesThunk,
+} from "@/store/reducers/userReducer";
+import RepairModal from "@/components/common/repair-modal";
 
 const StakingPage = () => {
   const { address } = useAccount();
@@ -37,6 +41,8 @@ const StakingPage = () => {
   const [unstaking, setUnstaking] = useState(false);
   const [rewards, setRewards] = useState<IStakeReward[]>([]);
   const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
+
+  const [repairTokenId, setRepairTokenId] = useState(-1);
 
   const { positions: stakePositions, loadPositions: loadStakePositions } =
     useStakePositionsOf(address);
@@ -137,6 +143,7 @@ const StakingPage = () => {
               <TableColumn>Claimed Reward</TableColumn>
               <TableColumn>Claimable Reward</TableColumn>
               <TableColumn>LPR</TableColumn>
+              <TableColumn className="w-32"> </TableColumn>
             </TableHeader>
             <TableBody>
               {stakePositions.length === 0 ? (
@@ -148,6 +155,7 @@ const StakingPage = () => {
                   >
                     No Staked NFTs
                   </TableCell>
+                  <TableCell className="hidden">d</TableCell>
                   <TableCell className="hidden">d</TableCell>
                   <TableCell className="hidden">d</TableCell>
                   <TableCell className="hidden">d</TableCell>
@@ -206,6 +214,25 @@ const StakingPage = () => {
                           ?.currentLPR
                       }
                     </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const lpr = rewards.find(
+                          (r) => r.tokenId === position.tokenId
+                        )?.currentLPR;
+                        if (lpr !== undefined && lpr < 100) {
+                          return (
+                            <Button
+                              color="primary"
+                              className="h-8"
+                              onClick={() => setRepairTokenId(position.tokenId)}
+                            >
+                              Claim & Repair
+                            </Button>
+                          );
+                        }
+                        return <></>;
+                      })()}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -231,6 +258,22 @@ const StakingPage = () => {
           return res;
         })()}
       />
+      {repairTokenId !== -1 && (
+        <RepairModal
+          open={repairTokenId !== -1}
+          onClose={() => setRepairTokenId(-1)}
+          mine={stakePositions.find((s) => s.tokenId === repairTokenId)}
+          lpr={rewards.find((r) => r.tokenId === repairTokenId)?.currentLPR}
+          onRepairCompleted={() => {
+            loadRewards();
+            loadStakePositions();
+            dispatch(
+              loadUserMinerBalancesThunk({ address, tokenIds: [repairTokenId] })
+            );
+            setRepairTokenId(-1);
+          }}
+        />
+      )}
     </>
   );
 };

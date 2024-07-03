@@ -18,6 +18,16 @@ import { MainChain, wagmiConfig } from "@/config/web3.config";
 import { useSelector } from "react-redux";
 import { RootState, useAppDispatch } from "@/store";
 import { loadUserMinerBalancesThunk } from "@/store/reducers/userReducer";
+import {
+  Checkbox,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@nextui-org/react";
 
 const MinerPage = () => {
   const { address } = useAccount();
@@ -83,63 +93,85 @@ const MinerPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center gap-10">
-      <div className="w-[240px] h-[320px] rounded-[24px] bg-slate-900 flex items-center justify-center text-[64px] font-bold">
-        ?
-      </div>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-[32px] font-bold mb-5">Mint MINER</h1>
-        <div>
-          <div className="mb-2">TypeID</div>
-          <div className="flex gap-3">
-            {new Array(MineTypeCount).fill(0).map((_, ind) => (
-              <Button
-                key={ind}
-                isIconOnly
-                onClick={() => setTypeId(ind + 1)}
-                variant={ind + 1 === typeId ? "solid" : "bordered"}
-                color="primary"
-              >
-                {ind + 1}
-              </Button>
-            ))}
+    <div>
+      <div className="flex items-center justify-center gap-10">
+        <div className="w-[240px] h-[320px] rounded-[24px] bg-slate-900 flex items-center justify-center text-[64px] font-bold">
+          ?
+        </div>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-[32px] font-bold mb-5">Mint MINER</h1>
+          <div>
+            <div className="mb-2">TypeID</div>
+            <div className="flex gap-3">
+              {new Array(MineTypeCount).fill(0).map((_, ind) => (
+                <Button
+                  key={ind}
+                  isIconOnly
+                  onClick={() => setTypeId(ind + 1)}
+                  variant={ind + 1 === typeId ? "solid" : "bordered"}
+                  color="primary"
+                >
+                  {ind + 1}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
-        <div>Price: {minerInfo[typeId].price} $FROST</div>
-        {address && <div>Balance: {minerBalances[typeId]}</div>}
-        <div className="flex items-center gap-2">
+          <div>Price: {minerInfo[typeId].price} $FROST</div>
+          {address && <div>Balance: {minerBalances[typeId]}</div>}
+          <div className="flex items-center gap-2">
+            <Button
+              color="primary"
+              isIconOnly
+              disabled={count === "" || Number(count) === 1}
+              onClick={() => setCount(Math.max(1, Number(count) - 1) + "")}
+            >
+              <Icon icon="ic:round-chevron-left" width={24} height={24} />
+            </Button>
+            <Input
+              type="number"
+              className="w-20 [&_input]:!text-center"
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+            />
+            <Button
+              color="primary"
+              isIconOnly
+              disabled={count === ""}
+              onClick={() => setCount(Number(count) + 1 + "")}
+            >
+              <Icon icon="ic:round-chevron-right" width={24} height={24} />
+            </Button>
+          </div>
           <Button
             color="primary"
-            isIconOnly
-            disabled={count === "" || Number(count) === 1}
-            onClick={() => setCount(Math.max(1, Number(count) - 1) + "")}
+            className="mt-2"
+            isLoading={btnLabel !== ""}
+            onClick={handleMint}
+            disabled={btnLabel !== "" || count === ""}
           >
-            <Icon icon="ic:round-chevron-left" width={24} height={24} />
-          </Button>
-          <Input
-            type="number"
-            className="w-20 [&_input]:!text-center"
-            value={count}
-            onChange={(e) => setCount(e.target.value)}
-          />
-          <Button
-            color="primary"
-            isIconOnly
-            disabled={count === ""}
-            onClick={() => setCount(Number(count) + 1 + "")}
-          >
-            <Icon icon="ic:round-chevron-right" width={24} height={24} />
+            {btnLabel === "" ? "Mint Miner" : btnLabel}
           </Button>
         </div>
-        <Button
-          color="primary"
-          className="mt-2"
-          isLoading={btnLabel !== ""}
-          onClick={handleMint}
-          disabled={btnLabel !== "" || count === ""}
+      </div>
+
+      <div className="mt-10 max-w-screen-sm mx-auto">
+        <Table
+          aria-label="Example table with dynamic content"
+          classNames={{ wrapper: "bg-gray-900", th: "bg-gray-950" }}
         >
-          {btnLabel === "" ? "Mint Miner" : btnLabel}
-        </Button>
+          <TableHeader>
+            <TableColumn>Token Id</TableColumn>
+            <TableColumn>Balance</TableColumn>
+          </TableHeader>
+          <TableBody>
+            {minerBalances.slice(1, 7).map((balance, ind) => (
+              <TableRow key={ind}>
+                <TableCell>#{ind + 1}</TableCell>
+                <TableCell>{balance}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

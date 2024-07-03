@@ -15,7 +15,7 @@ const initialState: AppState = {
     .fill(0)
     .map((_, i) => ({ amountForSale: 0, price: 0, typeId: i })),
   minerInfo: new Array(7).fill(0).map((_, i) => ({ price: 0, typeId: i })),
-  repairRate: 1000,
+  repairRate: 10,
 };
 
 export const loadMinerInfoThunk = createAsyncThunk(

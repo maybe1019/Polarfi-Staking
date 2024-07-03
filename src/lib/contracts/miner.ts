@@ -42,7 +42,7 @@ export const getMinerInfo = async () => {
 
     return {
       prices: info,
-      repairRate: Number(res[7].result || "1000"),
+      repairRate: Number(res[7].result || "1000") / 100,
     };
   } catch (error) {
     throw error;
@@ -59,6 +59,23 @@ export const getMinerBalanceOf = async (owner: string, typeId: number) => {
     });
 
     return Number(res);
+  } catch (error) {
+    console.error("getMinerBalanceOf", error);
+    throw error;
+  }
+};
+
+
+export const getMinerIsApprovedForAll = async (owner: string, operator: string) => {
+  try {
+    const res: any = await wagmiClient.readContract({
+      abi: ContractABIs.Miner,
+      address: ContractAddresses.Miner,
+      functionName: "isApprovedForAll",
+      args: [owner, operator],
+    });
+
+    return Boolean(res);
   } catch (error) {
     console.error("getMinerBalanceOf", error);
     throw error;

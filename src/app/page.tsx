@@ -1,24 +1,13 @@
 "use client";
 
 import { Button } from "@nextui-org/button";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
-import {
-  Checkbox,
-  Input,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import useTokenAllowance from "@/hooks/useTokenAllowance";
 import {
   ContractABIs,
   ContractAddresses,
-  DependencyDelayTime,
   MineTypeCount,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
@@ -26,7 +15,6 @@ import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { parseEther } from "viem";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
-import useMineBalanceOf from "@/hooks/useMineBalanceOf";
 import { RootState, useAppDispatch } from "@/store";
 import { loadMineInfoThunk } from "@/store/reducers/appReducer";
 import { useSelector } from "react-redux";
