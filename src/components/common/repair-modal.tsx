@@ -61,7 +61,6 @@ const RepairModal = ({
         address,
         ContractAddresses.Staking
       );
-      console.log(ContractAddresses.Staking, approved, mine?.tokenId, count);
       if (!approved) {
         setBtnText("Approving");
         const txHash = await writeContractAsync({

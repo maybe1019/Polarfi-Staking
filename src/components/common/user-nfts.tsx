@@ -72,8 +72,11 @@ const UserNFTs = () => {
 
       dispatch(removeNFTs(selectedTokenIds));
       setSelectedTokenIds([]);
-    } catch (error) {
-      console.error("handleStake", error);
+    } catch (error: any) {
+      console.error(
+        "handleStake",
+        Object.keys(error).map((key) => error[key])
+      );
     }
     setLoading(false);
     setBtnLabel("");

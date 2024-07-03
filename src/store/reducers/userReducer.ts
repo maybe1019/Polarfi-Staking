@@ -102,7 +102,7 @@ export const addNewMinesThunk = createAsyncThunk(
         (_, i): IStakePosition => ({
           user: address,
           nftType: typeId,
-          tokenId: totalSupply + i + 1,
+          tokenId: totalSupply - i,
           buyPrice: price,
           stakedTimestamp: 0,
           latestClaimedTimestamp: 0,
