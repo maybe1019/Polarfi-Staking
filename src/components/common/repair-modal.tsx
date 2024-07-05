@@ -4,6 +4,7 @@ import {
   ContractABIs,
   ContractAddresses,
   LDR,
+  MinerTypeCount,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
 import { getMinerIsApprovedForAll } from "@/lib/contracts/miner";
@@ -44,10 +45,17 @@ const RepairModal = ({
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const miners = useSelector((state: RootState) => state.user.miners.balances);
-  const repairRate = useSelector((state: RootState) => state.app.repairRate);
 
+  const [minerTypeId, setMinerTypeId] = useState(1);
   const [value, setValue] = useState("0");
   const [btnText, setBtnText] = useState("");
+
+  const minerInfo = useSelector((state: RootState) => state.app.minerInfo);
+
+  const repairRate = useMemo(
+    () => minerInfo[minerTypeId].repairRate,
+    [minerTypeId, minerInfo]
+  );
 
   const count = useMemo(() => {
     if (value === "") return 0;
@@ -80,7 +88,7 @@ const RepairModal = ({
         abi: ContractABIs.Staking,
         address: ContractAddresses.Staking,
         functionName: "repairNFT",
-        args: [[mine?.tokenId], [count]],
+        args: [[mine?.tokenId], [minerTypeId], [count]],
       });
       await waitForTransactionReceipt(wagmiConfig, {
         chainId: MainChain.id,
@@ -142,16 +150,29 @@ const RepairModal = ({
                 )}
               </span>
             </div>
+            <div className="flex gap-3 justify-center pt-5">
+              {new Array(MinerTypeCount).fill(0).map((_, ind) => (
+                <Button
+                  key={ind}
+                  isIconOnly
+                  onClick={() => setMinerTypeId(ind + 1)}
+                  variant={ind + 1 === minerTypeId ? "solid" : "bordered"}
+                  color="primary"
+                >
+                  {ind + 1}
+                </Button>
+              ))}
+            </div>
             <div className="flex items-center justify-between">
               <span>Miner Balance</span>
               <span>
-                {miners[mine.nftType]}
+                {miners[minerTypeId]}
                 {count > 0 ? (
                   <>
                     {" "}
                     →{" "}
                     <span className="text-danger">
-                      {miners[mine.nftType] - count}
+                      {miners[minerTypeId] - count}
                     </span>
                   </>
                 ) : (
@@ -166,14 +187,14 @@ const RepairModal = ({
                   type="number"
                   className="w-full"
                   min={0}
-                  max={miners[mine.nftType]}
+                  max={miners[minerTypeId]}
                   value={value}
                   onChange={(e) => {
                     if (e.target.value === "") {
                       setValue("");
                     } else {
                       setValue(
-                        Math.min(miners[mine.nftType], Number(e.target.value)) +
+                        Math.min(miners[minerTypeId], Number(e.target.value)) +
                           ""
                       );
                     }
@@ -192,12 +213,12 @@ const RepairModal = ({
                   </button>
                   <button
                     disabled={
-                      value === "" || Number(value) >= miners[mine.nftType]
+                      value === "" || Number(value) >= miners[minerTypeId]
                     }
                     onClick={(e) => {
                       if (value !== "") {
                         setValue(
-                          Math.min(miners[mine.nftType], Number(value) + 1) + ""
+                          Math.min(miners[minerTypeId], Number(value) + 1) + ""
                         );
                       }
                     }}

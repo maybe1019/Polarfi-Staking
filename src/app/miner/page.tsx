@@ -8,7 +8,7 @@ import useTokenAllowance from "@/hooks/useTokenAllowance";
 import {
   ContractABIs,
   ContractAddresses,
-  MineTypeCount,
+  MinerTypeCount,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
 import { useAccount, useWriteContract } from "wagmi";
@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import Image from "next/image";
 
 const MinerPage = () => {
   const { address } = useAccount();
@@ -95,15 +96,21 @@ const MinerPage = () => {
   return (
     <div>
       <div className="flex items-center justify-center gap-10">
-        <div className="w-[240px] h-[320px] rounded-[24px] bg-slate-900 flex items-center justify-center text-[64px] font-bold">
-          ?
+        <div className="w-[240px] flex items-center justify-center">
+          <Image
+            src={`/imgs/miners/${typeId}.png`}
+            alt="mine"
+            width={62}
+            height={63}
+            className="w-full h-auto"
+          />
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-[32px] font-bold mb-5">Mint MINER</h1>
           <div>
             <div className="mb-2">TypeID</div>
             <div className="flex gap-3">
-              {new Array(MineTypeCount).fill(0).map((_, ind) => (
+              {new Array(MinerTypeCount).fill(0).map((_, ind) => (
                 <Button
                   key={ind}
                   isIconOnly
@@ -117,6 +124,7 @@ const MinerPage = () => {
             </div>
           </div>
           <div>Price: {minerInfo[typeId].price} $FROST</div>
+          <div>Repair Rate: {minerInfo[typeId].repairRate} %</div>
           {address && <div>Balance: {minerBalances[typeId]}</div>}
           <div className="flex items-center gap-2">
             <Button
@@ -164,7 +172,7 @@ const MinerPage = () => {
             <TableColumn>Balance</TableColumn>
           </TableHeader>
           <TableBody>
-            {minerBalances.slice(1, 7).map((balance, ind) => (
+            {minerBalances.slice(1, MinerTypeCount + 1).map((balance, ind) => (
               <TableRow key={ind}>
                 <TableCell>#{ind + 1}</TableCell>
                 <TableCell>{balance}</TableCell>

@@ -33,7 +33,7 @@ export const getClaimableRewards = async (tokenIds: number[]) => {
         rewards.push({
           reward: Number(formatEther(r[0])),
           tokenId: tokenIds[i],
-          currentLPR: Number(r[1]) / 100,
+          currentLPR: Math.min(Number(r[1]) / 100, 100),
         });
       }
     });

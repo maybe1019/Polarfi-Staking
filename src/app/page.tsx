@@ -20,6 +20,7 @@ import { loadMineInfoThunk } from "@/store/reducers/appReducer";
 import { useSelector } from "react-redux";
 import { addNewMinesThunk } from "@/store/reducers/userReducer";
 import UserNFTs from "@/components/common/user-nfts";
+import Image from "next/image";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -97,8 +98,14 @@ export default function Home() {
   return (
     <div className="space-y-16">
       <div className="flex items-center justify-center gap-10 grow">
-        <div className="w-[240px] h-[320px] rounded-[24px] bg-slate-900 flex items-center justify-center text-[64px] font-bold">
-          ?
+        <div className="w-[240px] h-[240px]">
+          <Image
+            src={`/imgs/mines/${typeId}.gif`}
+            alt="mine"
+            width={1000}
+            height={1000}
+            className="w-full h-full"
+          />
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-[32px] font-bold mb-5">Buy MINE</h1>

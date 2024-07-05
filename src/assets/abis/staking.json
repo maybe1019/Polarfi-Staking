@@ -179,6 +179,12 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint8",
+        "name": "_minerId",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
         "internalType": "uint16",
         "name": "_rate",
         "type": "uint16"
@@ -522,6 +528,7 @@
   {
     "inputs": [
       { "internalType": "uint256[]", "name": "tokenIds", "type": "uint256[]" },
+      { "internalType": "uint8[]", "name": "minerIds", "type": "uint8[]" },
       { "internalType": "uint256[]", "name": "amounts", "type": "uint256[]" }
     ],
     "name": "repairNFT",
@@ -530,8 +537,8 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "repairRate",
+    "inputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "name": "repairRates",
     "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
     "stateMutability": "view",
     "type": "function"
@@ -607,7 +614,10 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint16", "name": "_rate", "type": "uint16" }],
+    "inputs": [
+      { "internalType": "uint8", "name": "_minerId", "type": "uint8" },
+      { "internalType": "uint16", "name": "_rate", "type": "uint16" }
+    ],
     "name": "setRepairRate",
     "outputs": [],
     "stateMutability": "nonpayable",

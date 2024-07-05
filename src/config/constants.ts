@@ -29,10 +29,11 @@ export const ContractABIs = {
 
 export const DependencyDelayTime = 200;
 
-export const MineTypeCount = 6;
-
 export const MaxLPR = 100;
 
 export const TransactionConfirmBlockCount = 1;
 
 export const LDR = 10;
+
+export const MinerTypeCount = 4;
+export const MineTypeCount = 6;

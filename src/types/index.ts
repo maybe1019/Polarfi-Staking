@@ -35,4 +35,5 @@ export interface IMineInfo {
 export interface IMinerInfo {
   typeId: number;
   price: number;
+  repairRate: number;
 }
