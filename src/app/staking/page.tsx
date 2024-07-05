@@ -3,6 +3,7 @@
 import {
   ContractABIs,
   ContractAddresses,
+  MineNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
 import useMineBalanceOf from "@/hooks/useMineBalanceOf";
@@ -31,6 +32,7 @@ import {
   loadUserMinesThunk,
 } from "@/store/reducers/userReducer";
 import RepairModal from "@/components/common/repair-modal";
+import Image from "next/image";
 
 const StakingPage = () => {
   const { address } = useAccount();
@@ -135,8 +137,8 @@ const StakingPage = () => {
                   }}
                 ></Checkbox>
               </TableColumn>
+              <TableColumn>Name</TableColumn>
               <TableColumn>Token Id</TableColumn>
-              <TableColumn>Type Id</TableColumn>
               <TableColumn>Buy Price</TableColumn>
               <TableColumn>Staked At</TableColumn>
               <TableColumn>Last Claim</TableColumn>
@@ -185,8 +187,19 @@ const StakingPage = () => {
                         }}
                       ></Checkbox>
                     </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={`/imgs/mines/${position.nftType}.png`}
+                          alt="mine"
+                          width={1000}
+                          height={1000}
+                          className="w-10 h-10 rounded-md"
+                        />
+                        <span>{MineNames[position.nftType]}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>#{position.tokenId}</TableCell>
-                    <TableCell>{position.nftType}</TableCell>
                     <TableCell>{position.buyPrice}</TableCell>
                     <TableCell>
                       {formatDate(new Date(position.stakedTimestamp)).date}{" "}

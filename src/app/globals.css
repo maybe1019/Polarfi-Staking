@@ -29,6 +29,7 @@ body {
 
 ::-webkit-scrollbar {
   width: 4px; /* Set the width of the scrollbar */
+  height: 4px; /* Set the width of the scrollbar */
 }
 
 ::-webkit-scrollbar-track {

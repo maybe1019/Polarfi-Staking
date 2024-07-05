@@ -37,3 +37,21 @@ export const LDR = 10;
 
 export const MinerTypeCount = 4;
 export const MineTypeCount = 6;
+
+export const MineNames = [
+  "",
+  "Ruby",
+  "Obsidian",
+  "Amethyst",
+  "Emerald",
+  "Gold",
+  "Diamond",
+];
+
+export const RepairKitNames = [
+  "",
+  "Fluorite Repair Kit",
+  "Amethyst Repair Kit",
+  "Obsidian Repair Kit",
+  "Agate Repair Kit",
+];

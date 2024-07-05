@@ -1,176 +1,43 @@
 "use client";
 
-import { Button } from "@nextui-org/button";
-import { useMemo, useState } from "react";
-import { Icon } from "@iconify/react";
-import { Input } from "@nextui-org/react";
-import useTokenAllowance from "@/hooks/useTokenAllowance";
-import {
-  ContractABIs,
-  ContractAddresses,
-  MineTypeCount,
-  TransactionConfirmBlockCount,
-} from "@/config/constants";
-import { useAccount, useWriteContract } from "wagmi";
-import { waitForTransactionReceipt } from "@wagmi/core";
-import { parseEther } from "viem";
-import { MainChain, wagmiConfig } from "@/config/web3.config";
-import { RootState, useAppDispatch } from "@/store";
-import { loadMineInfoThunk } from "@/store/reducers/appReducer";
-import { useSelector } from "react-redux";
-import { addNewMinesThunk } from "@/store/reducers/userReducer";
+import { useState } from "react";
+import { MineTypeCount } from "@/config/constants";
 import UserNFTs from "@/components/common/user-nfts";
-import Image from "next/image";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import MinePurchaseCard from "@/components/common/mine-purchase-card";
 
 export default function Home() {
-  const dispatch = useAppDispatch();
-  const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
-
-  const mineInfo = useSelector((state: RootState) => state.app.mineInfo);
-  const userMines = useSelector((state: RootState) => state.user.mines);
-
   const [typeId, setTypeId] = useState(1);
-  const [count, setCount] = useState("1");
-  const [btnLabel, setBtnLabel] = useState("");
-
-  const price = useMemo(() => mineInfo[typeId].price, [mineInfo, typeId]);
-  const amountForSale = useMemo(
-    () => mineInfo[typeId].amountForSale,
-    [mineInfo, typeId]
-  );
-
-  const { allowanceInNumber, loadAllowance } = useTokenAllowance(
-    ContractAddresses.Frost,
-    address,
-    ContractAddresses.Mine
-  );
-
-  const handleMint = async () => {
-    const cnt = Number(count);
-    if (!address) {
-      return;
-    }
-
-    try {
-      if (allowanceInNumber < price * cnt) {
-        setBtnLabel("Approving...");
-        const txHash = await writeContractAsync({
-          abi: ContractABIs.Frost,
-          address: ContractAddresses.Frost,
-          functionName: "approve",
-          args: [
-            ContractAddresses.Mine,
-            parseEther(Number.MAX_SAFE_INTEGER.toString()),
-          ],
-        });
-        await waitForTransactionReceipt(wagmiConfig, {
-          chainId: MainChain.id,
-          confirmations: TransactionConfirmBlockCount,
-          hash: txHash,
-        });
-        loadAllowance();
-      }
-
-      setBtnLabel("Minting...");
-
-      const hash = await writeContractAsync({
-        abi: ContractABIs.Mine,
-        address: ContractAddresses.Mine,
-        functionName: "buyNFT",
-        args: [typeId, cnt],
-      });
-
-      await waitForTransactionReceipt(wagmiConfig, {
-        chainId: MainChain.id,
-        confirmations: TransactionConfirmBlockCount,
-        hash,
-      });
-
-      dispatch(loadMineInfoThunk([typeId]));
-      dispatch(addNewMinesThunk({ cnt, typeId, address }));
-    } catch (error: any) {
-      console.error("handleMint", error?.message);
-    }
-    setBtnLabel("");
-  };
+  const [swiper, setSwiper] = useState<SwiperClass>();
 
   return (
     <div className="space-y-16">
-      <div className="flex items-center justify-center gap-10 grow">
-        <div className="w-[240px] h-[240px]">
-          <Image
-            src={`/imgs/mines/${typeId}.gif`}
-            alt="mine"
-            width={1000}
-            height={1000}
-            className="w-full h-full"
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <h1 className="text-[32px] font-bold mb-5">Buy MINE</h1>
-          <div>
-            <div className="mb-2">TypeID</div>
-            <div className="flex gap-3">
-              {new Array(MineTypeCount).fill(0).map((_, ind) => (
-                <Button
-                  key={ind}
-                  isIconOnly
-                  onClick={() => setTypeId(ind + 1)}
-                  variant={ind + 1 === typeId ? "solid" : "bordered"}
-                  color="primary"
-                >
-                  {ind + 1}
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>Price: {mineInfo[typeId].price} $FROST</div>
-          <div>
-            Balance: {userMines.data.filter((m) => m.nftType === typeId).length}
-          </div>
-          <div>Available: {mineInfo[typeId].amountForSale}</div>
-          <div className="flex items-center gap-2">
-            <Button
-              color="primary"
-              isIconOnly
-              disabled={count === "" || Number(count) === 1}
-              onClick={() => setCount(Math.max(1, Number(count) - 1) + "")}
-            >
-              <Icon icon="ic:round-chevron-left" width={24} height={24} />
-            </Button>
-            <Input
-              type="number"
-              className="w-20 [&_input]:!text-center"
-              value={count}
-              onChange={(e) => {
-                if (Number(e.target.value) > amountForSale) {
-                  setCount(amountForSale + "");
-                } else {
-                  setCount(e.target.value);
-                }
-              }}
-            />
-            <Button
-              color="primary"
-              isIconOnly
-              disabled={count === "" || Number(count) === amountForSale}
-              onClick={() =>
-                setCount(Math.min(amountForSale, Number(count) + 1) + "")
-              }
-            >
-              <Icon icon="ic:round-chevron-right" width={24} height={24} />
-            </Button>
-          </div>
-          <Button
-            color="primary"
-            className="mt-2"
-            isLoading={btnLabel !== ""}
-            onClick={handleMint}
-            disabled={btnLabel !== "" || count === ""}
+      <div>
+        <div className="w-[330px] md:w-[640px] mx-auto">
+          <Swiper
+            spaceBetween={50}
+            slidesPerView={1}
+            onSlideChange={(s) => setTypeId(s.realIndex + 1)}
+            onSwiper={(s) => setSwiper(s)}
+            className="w-full"
           >
-            {btnLabel === "" ? "Buy MINE" : btnLabel}
-          </Button>
+            {new Array(MineTypeCount).fill(0).map((_, i) => (
+              <SwiperSlide key={i}>
+                <MinePurchaseCard typeId={i + 1} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+        <div className="flex items-center justify-center gap-4 mt-5">
+          {new Array(MineTypeCount).fill(0).map((_, i) => (
+            <button
+              key={i}
+              className={`w-4 h-4 rounded-full border-2 border-primary ${
+                i === typeId - 1 ? "bg-primary" : ""
+              }`}
+              onClick={() => swiper?.slideTo(i)}
+            ></button>
+          ))}
         </div>
       </div>
       <UserNFTs />

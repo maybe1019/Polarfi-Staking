@@ -8,6 +8,7 @@ import { wagmiConfig } from "@/config/web3.config";
 import { headers } from "next/headers";
 
 import "./globals.css";
+import 'swiper/css';
 
 export const metadata: Metadata = {
   title: "PolarFi",

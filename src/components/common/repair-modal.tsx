@@ -4,7 +4,9 @@ import {
   ContractABIs,
   ContractAddresses,
   LDR,
+  MineNames,
   MinerTypeCount,
+  RepairKitNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
 import { getMinerIsApprovedForAll } from "@/lib/contracts/miner";
@@ -26,6 +28,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useAccount } from "wagmi";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
+import Image from "next/image";
 
 type Props = {
   mine?: IStakePosition;
@@ -113,118 +116,157 @@ const RepairModal = ({
 
   if (!mine || lpr === undefined) return "";
   return (
-    <Modal isOpen={open} onOpenChange={handleClose} size="sm">
+    <Modal isOpen={open} onOpenChange={handleClose} size="md">
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1 text-[24px]">
-          Claim Rewards
+          Claim and Repair
         </ModalHeader>
         <ModalBody>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span>TokenId</span>
-              <span>#{mine.tokenId}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Type</span>
-              <span>{mine.nftType}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>LPR</span>
-              <span>
-                {lpr}
-                {" → "}
-                <span className="text-danger">{Math.max(0, lpr - LDR)}</span>
-                {count > 0 ? (
-                  <>
-                    {" "}
-                    →{" "}
-                    <span className="text-primary">
-                      {Math.min(
-                        100,
-                        Math.max(0, lpr - LDR) + count * repairRate
-                      )}
-                    </span>
-                  </>
-                ) : (
-                  ""
-                )}
-              </span>
-            </div>
-            <div className="flex gap-3 justify-center pt-5">
-              {new Array(MinerTypeCount).fill(0).map((_, ind) => (
-                <Button
-                  key={ind}
-                  isIconOnly
-                  onClick={() => setMinerTypeId(ind + 1)}
-                  variant={ind + 1 === minerTypeId ? "solid" : "bordered"}
-                  color="primary"
-                >
-                  {ind + 1}
-                </Button>
-              ))}
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Miner Balance</span>
-              <span>
-                {miners[minerTypeId]}
-                {count > 0 ? (
-                  <>
-                    {" "}
-                    →{" "}
+          <div>
+            <div className="flex gap-5">
+              <div className="w-[140px] h-[140px]">
+                <Image
+                  src={`/imgs/mines/${mine.nftType}.png`}
+                  alt="mine"
+                  width={140}
+                  height={140}
+                  className="w-full rounded-md"
+                />
+              </div>
+              <div className="grow flex flex-col justify-center gap-2">
+                <div className="text-[20px] font-bold text-center">
+                  {MineNames[mine.nftType]}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>TokenId</span>
+                  <span>#{mine.tokenId}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Type</span>
+                  <span>{mine.nftType}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>LPR</span>
+                  <span>
+                    {lpr}
+                    {" → "}
                     <span className="text-danger">
-                      {miners[minerTypeId] - count}
+                      {Math.max(0, lpr - LDR)}
                     </span>
-                  </>
-                ) : (
-                  ""
-                )}
-              </span>
+                    {count > 0 ? (
+                      <>
+                        {" "}
+                        →{" "}
+                        <span className="text-primary">
+                          {Math.min(
+                            100,
+                            Math.max(0, lpr - LDR) + count * repairRate
+                          )}
+                        </span>
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center justify-between !mt-5">
-              <div>Input miner balance</div>
-              <div className="relative w-[140px]">
-                <Input
-                  type="number"
-                  className="w-full"
-                  min={0}
-                  max={miners[minerTypeId]}
-                  value={value}
-                  onChange={(e) => {
-                    if (e.target.value === "") {
-                      setValue("");
-                    } else {
-                      setValue(
-                        Math.min(miners[minerTypeId], Number(e.target.value)) +
-                          ""
-                      );
-                    }
-                  }}
-                ></Input>
-                <div className="flex gap-2 absolute top-1/2 right-3 -translate-y-1/2">
-                  <button
-                    disabled={value === "" || Number(value) === 0}
-                    onClick={(e) => {
-                      if (value !== "") {
-                        setValue(Math.max(0, Number(value) - 1) + "");
-                      }
+
+            <div className="flex gap-5 mt-10">
+              <div className="grid grid-cols-2 gap-[10px] w-[140px]">
+                {new Array(MinerTypeCount).fill(0).map((_, ind) => (
+                  <div
+                    key={ind}
+                    className={`aspect-square flex items-center justify-center cursor-pointer rounded-md transition-all ${
+                      minerTypeId === ind + 1 ? "bg-primary" : ""
+                    }`}
+                    onClick={() => {
+                      setMinerTypeId(ind + 1);
+                      setValue("0");
                     }}
                   >
-                    <Icon icon={"typcn:minus"} />
-                  </button>
-                  <button
-                    disabled={
-                      value === "" || Number(value) >= miners[minerTypeId]
-                    }
-                    onClick={(e) => {
-                      if (value !== "") {
-                        setValue(
-                          Math.min(miners[minerTypeId], Number(value) + 1) + ""
-                        );
+                    <Image
+                      alt="miner"
+                      src={`/imgs/miners/${ind + 1}.png`}
+                      width={62}
+                      height={63}
+                      className="w-14 h-auto"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col gap-2 justify-center grow">
+                <div className="text-[20px] font-bold text-center">
+                  {RepairKitNames[minerTypeId]}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Repair Rate</span>
+                  <span>{minerInfo[minerTypeId].repairRate}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Balance</span>
+                  <span>
+                    {miners[minerTypeId]}
+                    {count > 0 ? (
+                      <>
+                        {" "}
+                        →{" "}
+                        <span className="text-danger">
+                          {miners[minerTypeId] - count}
+                        </span>
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 justify-center w-full">
+                    <button
+                      disabled={value === "" || Number(value) === 0}
+                      onClick={(e) => {
+                        if (value !== "") {
+                          setValue(Math.max(0, Number(value) - 1) + "");
+                        }
+                      }}
+                    >
+                      <Icon icon={"typcn:minus"} />
+                    </button>
+                    <Input
+                      type="number"
+                      className="w-[100px]"
+                      min={0}
+                      max={miners[minerTypeId]}
+                      value={value}
+                      onChange={(e) => {
+                        if (e.target.value === "") {
+                          setValue("");
+                        } else {
+                          setValue(
+                            Math.min(
+                              miners[minerTypeId],
+                              Number(e.target.value)
+                            ) + ""
+                          );
+                        }
+                      }}
+                    ></Input>
+                    <button
+                      disabled={
+                        value === "" || Number(value) >= miners[minerTypeId]
                       }
-                    }}
-                  >
-                    <Icon icon={"typcn:plus"} />
-                  </button>
+                      onClick={(e) => {
+                        if (value !== "") {
+                          setValue(
+                            Math.min(miners[minerTypeId], Number(value) + 1) +
+                              ""
+                          );
+                        }
+                      }}
+                    >
+                      <Icon icon={"typcn:plus"} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

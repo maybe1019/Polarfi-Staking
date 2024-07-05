@@ -1,6 +1,7 @@
 import {
   ContractABIs,
   ContractAddresses,
+  MineNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
 import { getMineAllowance } from "@/lib/contracts/mine";
@@ -24,6 +25,7 @@ import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
 import { removeNFTs } from "@/store/reducers/userReducer";
+import Image from "next/image";
 
 const UserNFTs = () => {
   const dispatch = useAppDispatch();
@@ -103,6 +105,7 @@ const UserNFTs = () => {
       <Table
         aria-label="Example table with dynamic content"
         classNames={{ wrapper: "bg-gray-900", th: "bg-gray-950" }}
+        selectedKeys={selectedTokenIds}
       >
         <TableHeader>
           <TableColumn width={40}>
@@ -124,8 +127,8 @@ const UserNFTs = () => {
               }}
             ></Checkbox>
           </TableColumn>
+          <TableColumn>Name</TableColumn>
           <TableColumn>Token Id</TableColumn>
-          <TableColumn>Type Id</TableColumn>
           <TableColumn>Buy Price</TableColumn>
           <TableColumn>Staked At</TableColumn>
           <TableColumn>Last Claim</TableColumn>
@@ -159,35 +162,55 @@ const UserNFTs = () => {
               .map((a) => a)
               .sort((a, b) => a.tokenId - b.tokenId)
               .map((mine, ind) => (
-                <TableRow key={ind}>
-                  <TableCell>
+                <TableRow
+                  key={mine.tokenId}
+                  className={`group [&>td]:transition-all cursor-pointer ${
+                    selectedTokenIds.includes(mine.tokenId)
+                      ? "[&>td]:bg-primary/20"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    if (selectedTokenIds.includes(mine.tokenId)) {
+                      setSelectedTokenIds((prev) =>
+                        prev.filter((t) => t !== mine.tokenId)
+                      );
+                    } else {
+                      setSelectedTokenIds((prev) => [...prev, mine.tokenId]);
+                    }
+                  }}
+                >
+                  <TableCell className="rounded-l-md group-hover:bg-primary/10">
                     <Checkbox
                       isSelected={selectedTokenIds.includes(mine.tokenId)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedTokenIds((prev) => [
-                            ...prev,
-                            mine.tokenId,
-                          ]);
-                        } else {
-                          setSelectedTokenIds((prev) =>
-                            prev.filter((t) => t !== mine.tokenId)
-                          );
-                        }
-                      }}
+                      onChange={(e) => {}}
                     ></Checkbox>
                   </TableCell>
-                  <TableCell>#{mine.tokenId}</TableCell>
-                  <TableCell>{mine.nftType}</TableCell>
-                  <TableCell>{mine.buyPrice}</TableCell>
-                  <TableCell>
+                  <TableCell className="group-hover:bg-primary/10">
+                    <div className="flex items-center gap-2">
+                      <Image
+                        src={`/imgs/mines/${mine.nftType}.png`}
+                        alt="mine"
+                        width={1000}
+                        height={1000}
+                        className="w-10 h-10 rounded-md"
+                      />
+                      <span>{MineNames[mine.nftType]}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="group-hover:bg-primary/10">
+                    #{mine.tokenId}
+                  </TableCell>
+                  <TableCell className="group-hover:bg-primary/10">
+                    {mine.buyPrice}
+                  </TableCell>
+                  <TableCell className="group-hover:bg-primary/10">
                     {mine.stakedTimestamp === 0
                       ? "-"
                       : `${formatDate(new Date(mine.stakedTimestamp)).date} ${
                           formatDate(new Date(mine.stakedTimestamp)).time
                         }`}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="group-hover:bg-primary/10">
                     {mine.claimedRewards === 0
                       ? "-"
                       : `${
@@ -196,15 +219,17 @@ const UserNFTs = () => {
                           formatDate(new Date(mine.latestClaimedTimestamp)).time
                         }`}
                   </TableCell>
-                  <TableCell>{mine.claimedRewards}</TableCell>
+                  <TableCell className="group-hover:bg-primary/10">
+                    {mine.claimedRewards}
+                  </TableCell>
                   <TableCell
-                    className={
+                    className={`group-hover:bg-primary/10 rounded-r-md ${
                       mine.latestLpr === 0
                         ? "text-danger"
                         : mine.latestLpr < 80
                         ? "text-primary"
                         : "text-success"
-                    }
+                    }`}
                   >
                     {mine.latestLpr / 100}
                   </TableCell>
