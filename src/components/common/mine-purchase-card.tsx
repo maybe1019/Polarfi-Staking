@@ -1,6 +1,7 @@
 import {
   ContractABIs,
   ContractAddresses,
+  Messages,
   MineNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
@@ -17,6 +18,8 @@ import { parseEther } from "viem";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
 import { loadMineInfoThunk } from "@/store/reducers/appReducer";
 import { addNewMinesThunk } from "@/store/reducers/userReducer";
+import { toast } from "react-toastify";
+import useCheckNetworkStatus from "@/hooks/useCheckNetworkStatus";
 
 type Props = {
   typeId: number;
@@ -24,8 +27,9 @@ type Props = {
 
 const MinePurchaseCard = ({ typeId }: Props) => {
   const dispatch = useAppDispatch();
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const { checkNetworkStatus } = useCheckNetworkStatus();
 
   const mineInfo = useSelector(
     (state: RootState) => state.app.mineInfo[typeId]
@@ -40,10 +44,15 @@ const MinePurchaseCard = ({ typeId }: Props) => {
   const [btnLabel, setBtnLabel] = useState("");
 
   const handleMint = async () => {
-    const cnt = Number(count);
+    if (!checkNetworkStatus()) {
+      return;
+    }
+
     if (!address) {
       return;
     }
+
+    const cnt = Number(count);
 
     try {
       const allowanceInNumber = await getFrostAllowance(
@@ -85,16 +94,19 @@ const MinePurchaseCard = ({ typeId }: Props) => {
 
       dispatch(loadMineInfoThunk([typeId]));
       dispatch(addNewMinesThunk({ cnt, typeId, address }));
+
+      toast.success(Messages.Success);
     } catch (error: any) {
       console.error("handleMint", error?.message);
+      toast.error(Messages.TransactionRejected);
     }
     setBtnLabel("");
   };
   return (
     <div className="bg-slate-800 rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-      <div>
+      <div className="bg-[#A0AECB]">
         <Image
-          src={`/imgs/mines/${typeId}.png`}
+          src={`/imgs/mines/${typeId}.gif`}
           alt="mine"
           width={1000}
           height={1000}

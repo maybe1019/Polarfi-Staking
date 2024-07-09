@@ -4,6 +4,7 @@ import {
   ContractABIs,
   ContractAddresses,
   LDR,
+  Messages,
   MineNames,
   MinerTypeCount,
   RepairKitNames,
@@ -29,6 +30,8 @@ import { useSelector } from "react-redux";
 import { useAccount } from "wagmi";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
 import Image from "next/image";
+import useCheckNetworkStatus from "@/hooks/useCheckNetworkStatus";
+import { toast } from "react-toastify";
 
 type Props = {
   mine?: IStakePosition;
@@ -47,6 +50,8 @@ const RepairModal = ({
 }: Props) => {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const { checkNetworkStatus } = useCheckNetworkStatus();
+
   const miners = useSelector((state: RootState) => state.user.miners.balances);
 
   const [minerTypeId, setMinerTypeId] = useState(1);
@@ -66,6 +71,9 @@ const RepairModal = ({
   }, [value]);
 
   const handleRepair = async () => {
+    if (!checkNetworkStatus()) {
+      return;
+    }
     if (!address) return;
     try {
       const approved = await getMinerIsApprovedForAll(
@@ -99,11 +107,13 @@ const RepairModal = ({
         hash,
       });
       onRepairCompleted();
+      toast.success(Messages.Success);
     } catch (error: any) {
       console.error(
         "error",
         Object.keys(error).map((key) => error[key])
       );
+      toast.error(Messages.TransactionRejected);
     }
     setBtnText("");
   };

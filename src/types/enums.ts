@@ -4,3 +4,9 @@ export enum LoadingStatus {
   Fulfilled,
   Failed,
 }
+
+export enum NetworkStatus {
+  NotConnected,
+  WrongNetwork,
+  Success,
+}

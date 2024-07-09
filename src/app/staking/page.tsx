@@ -3,6 +3,7 @@
 import {
   ContractABIs,
   ContractAddresses,
+  Messages,
   MineNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
@@ -33,11 +34,14 @@ import {
 } from "@/store/reducers/userReducer";
 import RepairModal from "@/components/common/repair-modal";
 import Image from "next/image";
+import useCheckNetworkStatus from "@/hooks/useCheckNetworkStatus";
+import { toast } from "react-toastify";
 
 const StakingPage = () => {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const dispatch = useAppDispatch();
+  const { checkNetworkStatus } = useCheckNetworkStatus();
 
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const [unstaking, setUnstaking] = useState(false);
@@ -58,6 +62,10 @@ const StakingPage = () => {
   }, [loadRewards]);
 
   const handleUnstake = async () => {
+    if (!checkNetworkStatus()) {
+      return;
+    }
+
     setUnstaking(true);
 
     try {
@@ -79,11 +87,13 @@ const StakingPage = () => {
       setTimeout(() => {
         loadStakePositions();
       }, 3000);
+      toast.success(Messages.Success);
     } catch (error: any) {
       console.error(
         "handleUnstake",
         Object.keys(error).map((key) => error[key])
       );
+      toast.error(Messages.TransactionRejected);
     }
 
     setUnstaking(false);

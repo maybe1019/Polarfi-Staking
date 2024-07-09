@@ -55,3 +55,10 @@ export const RepairKitNames = [
   "Obsidian Repair Kit",
   "Agate Repair Kit",
 ];
+
+export const Messages = {
+  TransactionRejected: "Transaction rejected.",
+  ConnectWallet: "Connect wallet.",
+  WrongNetwork: "Change network.",
+  Success: "Success!",
+};

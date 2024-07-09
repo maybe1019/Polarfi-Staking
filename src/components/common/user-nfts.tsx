@@ -1,6 +1,7 @@
 import {
   ContractABIs,
   ContractAddresses,
+  Messages,
   MineNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
@@ -26,17 +27,24 @@ import { waitForTransactionReceipt } from "@wagmi/core";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
 import { removeNFTs } from "@/store/reducers/userReducer";
 import Image from "next/image";
+import useCheckNetworkStatus from "@/hooks/useCheckNetworkStatus";
+import { toast } from "react-toastify";
 
 const UserNFTs = () => {
   const dispatch = useAppDispatch();
   const userMines = useSelector((state: RootState) => state.user.mines);
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const { checkNetworkStatus } = useCheckNetworkStatus();
 
   const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [btnLabel, setBtnLabel] = useState("");
+
   const handleStake = async () => {
+    if (!checkNetworkStatus()) {
+      return;
+    }
     if (!address) return;
     setLoading(true);
     try {
@@ -74,11 +82,13 @@ const UserNFTs = () => {
 
       dispatch(removeNFTs(selectedTokenIds));
       setSelectedTokenIds([]);
+      toast.success(Messages.Success);
     } catch (error: any) {
       console.error(
         "handleStake",
         Object.keys(error).map((key) => error[key])
       );
+      toast.error(Messages.TransactionRejected);
     }
     setLoading(false);
     setBtnLabel("");
@@ -182,7 +192,18 @@ const UserNFTs = () => {
                   <TableCell className="rounded-l-md group-hover:bg-primary/10">
                     <Checkbox
                       isSelected={selectedTokenIds.includes(mine.tokenId)}
-                      onChange={(e) => {}}
+                      onClick={() => {
+                        if (selectedTokenIds.includes(mine.tokenId)) {
+                          setSelectedTokenIds((prev) =>
+                            prev.filter((t) => t !== mine.tokenId)
+                          );
+                        } else {
+                          setSelectedTokenIds((prev) => [
+                            ...prev,
+                            mine.tokenId,
+                          ]);
+                        }
+                      }}
                     ></Checkbox>
                   </TableCell>
                   <TableCell className="group-hover:bg-primary/10">

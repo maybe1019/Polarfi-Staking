@@ -11,7 +11,14 @@ import { IStakeReward } from "@/types";
 import { useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { MainChain, wagmiConfig } from "@/config/web3.config";
-import { ContractABIs, ContractAddresses, TransactionConfirmBlockCount } from "@/config/constants";
+import {
+  ContractABIs,
+  ContractAddresses,
+  Messages,
+  TransactionConfirmBlockCount,
+} from "@/config/constants";
+import useCheckNetworkStatus from "@/hooks/useCheckNetworkStatus";
+import { toast } from "react-toastify";
 
 type Props = {
   rewards: IStakeReward[];
@@ -22,9 +29,15 @@ type Props = {
 
 const RewardModal = ({ rewards, open, setOpen, onStakeCompleted }: Props) => {
   const { writeContractAsync } = useWriteContract();
+  const { checkNetworkStatus } = useCheckNetworkStatus();
+
   const [claiming, setClaiming] = useState(false);
 
   const handleClaim = async () => {
+    if (!checkNetworkStatus()) {
+      return;
+    }
+
     setClaiming(true);
     try {
       const txHash = await writeContractAsync({
@@ -40,9 +53,11 @@ const RewardModal = ({ rewards, open, setOpen, onStakeCompleted }: Props) => {
       });
 
       onStakeCompleted();
+      toast.success(Messages.Success);
       setOpen(false);
     } catch (error) {
       console.error("handleClaim", error);
+      toast.error(Messages.TransactionRejected);
     }
 
     setClaiming(false);

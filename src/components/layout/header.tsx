@@ -14,7 +14,7 @@ import { Button } from "@nextui-org/react";
 const Header = () => {
   const { open } = useWeb3Modal();
 
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
 
   const { data: tokenBalance } = useBalance({
     address,
@@ -22,6 +22,16 @@ const Header = () => {
     chainId: MainChain.id,
     unit: "ether",
   });
+
+  const onConnect = () => {
+    if (!address) {
+      open();
+    } else if (chainId !== MainChain.id) {
+      open({ view: "Networks" });
+    } else {
+      open();
+    }
+  };
 
   return (
     <header className="flex items-center px-4 md:px-10 h-16 md:h-20 gap-5">
@@ -40,8 +50,12 @@ const Header = () => {
           Balance: {Number(tokenBalance?.formatted).toLocaleString()} $FROST
         </div>
       )}
-      <Button onClick={() => open()} color="primary">
-        {address ? shortenAddress(address) : "Connect Wallet"}
+      <Button onClick={onConnect} color="primary">
+        {!address
+          ? "Connect Wallet"
+          : chainId !== MainChain.id
+          ? "Wrong Network"
+          : shortenAddress(address)}
       </Button>
     </header>
   );
