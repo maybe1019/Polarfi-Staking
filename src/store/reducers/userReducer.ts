@@ -3,7 +3,10 @@ import {
   getMineTokenTypeIds,
   getMineTotalSupply,
 } from "@/lib/contracts/mine";
-import { getStakePositions } from "@/lib/contracts/staking";
+import {
+  getStakedTokenIdsOf,
+  getStakePositions,
+} from "@/lib/contracts/staking";
 import { IStakePosition } from "@/types";
 import { LoadingStatus } from "@/types/enums";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -20,6 +23,10 @@ export interface UserState {
     balances: number[];
     status: LoadingStatus;
   };
+  stakePositions: {
+    data: IStakePosition[];
+    status: LoadingStatus;
+  };
 }
 
 const initialState: UserState = {
@@ -32,7 +39,34 @@ const initialState: UserState = {
     balances: new Array(7).fill(0),
     status: LoadingStatus.NotStarted,
   },
+  stakePositions: {
+    data: [],
+    status: LoadingStatus.NotStarted,
+  },
 };
+
+export const loadUserStakePositionsThunk = createAsyncThunk(
+  "loadUserStakePositionsThunk",
+  async (
+    { address, tokenIds }: { address?: string; tokenIds?: number[] },
+    { rejectWithValue, getState }
+  ) => {
+    try {
+      if (!address) {
+        return [];
+      }
+
+      if (tokenIds === undefined) {
+        tokenIds = await getStakedTokenIdsOf(address);
+      }
+
+      return await getStakePositions(tokenIds);
+    } catch (error) {
+      console.error("loadUserStakePositionsThunk", error);
+      return rejectWithValue("");
+    }
+  }
+);
 
 export const loadUserMinesThunk = createAsyncThunk(
   "loadUserMinesThunk",
@@ -160,6 +194,22 @@ export const userSlice = createSlice({
         state.miners.balances[balance.tokenId] = balance.balance;
       });
     });
+
+    builder
+      .addCase(loadUserStakePositionsThunk.pending, (state) => {
+        state.stakePositions.status = LoadingStatus.Loading;
+      })
+      .addCase(loadUserStakePositionsThunk.fulfilled, (state, action) => {
+        action.payload.forEach((s) => {
+          const tokenIds = state.stakePositions.data.map((s) => s.tokenId);
+          if (tokenIds.includes(s.tokenId)) {
+            state.stakePositions.data = state.stakePositions.data.filter(
+              (d) => d.tokenId !== s.tokenId
+            );
+          }
+          state.stakePositions.data.push(s);
+        });
+      });
   },
 });
 

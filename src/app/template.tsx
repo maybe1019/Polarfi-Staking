@@ -9,6 +9,7 @@ import {
 import {
   loadUserMinerBalancesThunk,
   loadUserMinesThunk,
+  loadUserStakePositionsThunk,
 } from "@/store/reducers/userReducer";
 import React, { PropsWithChildren, useEffect } from "react";
 import { useAccount } from "wagmi";
@@ -21,6 +22,7 @@ const Template = ({ children }: PropsWithChildren) => {
     const timerId = setTimeout(() => {
       dispatch(loadUserMinesThunk({ address }));
       dispatch(loadUserMinerBalancesThunk({ address }));
+      dispatch(loadUserStakePositionsThunk({ address }));
     }, DependencyDelayTime);
 
     return () => {

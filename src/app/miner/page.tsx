@@ -186,7 +186,7 @@ const MinerPage = () => {
         </div>
       </div>
 
-      <div className="mt-10 max-w-screen-sm mx-auto">
+      <div className="mt-10 max-w-screen-sm mx-auto [&_*]:!text-[18px] [&_td]:!py-3">
         <Table
           aria-label="Example table with dynamic content"
           classNames={{ wrapper: "bg-gray-900", th: "bg-gray-950" }}

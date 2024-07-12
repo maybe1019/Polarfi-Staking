@@ -34,13 +34,13 @@ const Header = () => {
   };
 
   return (
-    <header className="flex items-center px-4 md:px-10 h-16 md:h-20 gap-5">
+    <header className="flex items-center px-4 md:px-10 h-16 md:h-20 gap-5 relative z-10 bg-black/40 backdrop-blur-sm">
       <Link href={"/"} className="mr-auto md:mr-0">
         <IconPolarFiLogo className="h-10 w-auto" />
       </Link>
       <nav className="md:flex items-center gap-8 mx-auto hidden">
         {Links.map((link, index) => (
-          <Link href={link.href} key={index}>
+          <Link href={link.href} key={index} className="text-[18px] uppercase">
             {link.label}
           </Link>
         ))}

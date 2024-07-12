@@ -7,8 +7,6 @@ import {
   MineNames,
   TransactionConfirmBlockCount,
 } from "@/config/constants";
-import useMineBalanceOf from "@/hooks/useMineBalanceOf";
-import useStakePositionsOf from "@/hooks/useStakePositionsOf";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@nextui-org/button";
 import {
@@ -27,15 +25,20 @@ import { MainChain, wagmiConfig } from "@/config/web3.config";
 import { getClaimableRewards } from "@/hooks/useClaimableRewards";
 import { IStakeReward } from "@/types";
 import RewardModal from "@/components/common/reward-modal";
-import { useAppDispatch } from "@/store";
+import { RootState, useAppDispatch } from "@/store";
 import {
   loadUserMinerBalancesThunk,
   loadUserMinesThunk,
+  loadUserStakePositionsThunk,
 } from "@/store/reducers/userReducer";
 import RepairModal from "@/components/common/repair-modal";
 import Image from "next/image";
 import useCheckNetworkStatus from "@/hooks/useCheckNetworkStatus";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import StakePositionCard from "@/components/common/stake-position-card";
+import { Icon } from "@iconify/react";
 
 const StakingPage = () => {
   const { address } = useAccount();
@@ -47,14 +50,18 @@ const StakingPage = () => {
   const [unstaking, setUnstaking] = useState(false);
   const [rewards, setRewards] = useState<IStakeReward[]>([]);
   const [selectedTokenIds, setSelectedTokenIds] = useState<number[]>([]);
+  const [swiper, setSwiper] = useState<SwiperClass>();
 
   const [repairTokenId, setRepairTokenId] = useState(-1);
 
-  const { positions: stakePositions, loadPositions: loadStakePositions } =
-    useStakePositionsOf(address);
+  const stakePositions = useSelector(
+    (state: RootState) => state.user.stakePositions
+  );
 
   const loadRewards = useCallback(async () => {
-    setRewards(await getClaimableRewards(stakePositions.map((p) => p.tokenId)));
+    setRewards(
+      await getClaimableRewards(stakePositions.data.map((p) => p.tokenId))
+    );
   }, [stakePositions]);
 
   useEffect(() => {
@@ -85,7 +92,7 @@ const StakingPage = () => {
       dispatch(loadUserMinesThunk({ address, tokenIds: selectedTokenIds }));
       setSelectedTokenIds([]);
       setTimeout(() => {
-        loadStakePositions();
+        dispatch(loadUserStakePositionsThunk({ address }));
       }, 3000);
       toast.success(Messages.Success);
     } catch (error: any) {
@@ -102,8 +109,39 @@ const StakingPage = () => {
   return (
     <>
       <div>
-        <div className="mb-2 h-10 flex items-center justify-between">
-          <span>Total Staked: {stakePositions.length} NFTs</span>
+        <div className="w-full relative">
+          <Swiper onSwiper={(s) => setSwiper(s)}>
+            {stakePositions.data.map((position, index) => (
+              <SwiperSlide key={index}>
+                <StakePositionCard
+                  position={position}
+                  reward={rewards.find((r) => r.tokenId === position.tokenId)}
+                  loadRewards={loadRewards}
+                />
+              </SwiperSlide>
+            ))}
+            <div className="flex items-center gap-3 absolute top-3 right-3 z-10">
+              <Button
+                className="rounded-full w-8 h-8 p-0 min-w-0"
+                isIconOnly
+                color={"primary"}
+                onClick={() => swiper?.slidePrev()}
+              >
+                <Icon icon="ic:round-chevron-left" width={24} height={24} />
+              </Button>
+              <Button
+                className="rounded-full w-8 h-8 p-0 min-w-0"
+                isIconOnly
+                color={"primary"}
+                onClick={() => swiper?.slideNext()}
+              >
+                <Icon icon="ic:round-chevron-right" width={24} height={24} />
+              </Button>
+            </div>
+          </Swiper>
+        </div>
+        <div className="mb-2 h-10 flex items-center justify-between mt-10">
+          <span>Total Staked: {stakePositions.data.length} NFTs</span>
           <div className="flex gap-3">
             <Button
               color="primary"
@@ -132,15 +170,17 @@ const StakingPage = () => {
                 <Checkbox
                   isSelected={
                     selectedTokenIds.length > 0 &&
-                    selectedTokenIds.length === stakePositions.length
+                    selectedTokenIds.length === stakePositions.data.length
                   }
                   isIndeterminate={
                     selectedTokenIds.length > 0 &&
-                    selectedTokenIds.length !== stakePositions.length
+                    selectedTokenIds.length !== stakePositions.data.length
                   }
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedTokenIds(stakePositions.map((p) => p.tokenId));
+                      setSelectedTokenIds(
+                        stakePositions.data.map((p) => p.tokenId)
+                      );
                     } else {
                       setSelectedTokenIds([]);
                     }
@@ -158,7 +198,7 @@ const StakingPage = () => {
               <TableColumn className="w-32"> </TableColumn>
             </TableHeader>
             <TableBody>
-              {stakePositions.length === 0 ? (
+              {stakePositions.data.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={9}
@@ -178,7 +218,7 @@ const StakingPage = () => {
                   <TableCell className="hidden">d</TableCell>
                 </TableRow>
               ) : (
-                stakePositions.map((position, ind) => (
+                stakePositions.data.map((position, ind) => (
                   <TableRow key={ind}>
                     <TableCell>
                       <Checkbox
@@ -268,7 +308,7 @@ const StakingPage = () => {
         setOpen={setClaimModalOpen}
         onStakeCompleted={() => {
           loadRewards();
-          loadStakePositions();
+          dispatch(loadUserStakePositionsThunk({ address }));
         }}
         rewards={(() => {
           const res: IStakeReward[] = [];
@@ -285,11 +325,11 @@ const StakingPage = () => {
         <RepairModal
           open={repairTokenId !== -1}
           onClose={() => setRepairTokenId(-1)}
-          mine={stakePositions.find((s) => s.tokenId === repairTokenId)}
+          mine={stakePositions.data.find((s) => s.tokenId === repairTokenId)}
           lpr={rewards.find((r) => r.tokenId === repairTokenId)?.currentLPR}
           onRepairCompleted={() => {
             loadRewards();
-            loadStakePositions();
+            dispatch(loadUserStakePositionsThunk({ address }));
             dispatch(
               loadUserMinerBalancesThunk({ address, tokenIds: [repairTokenId] })
             );

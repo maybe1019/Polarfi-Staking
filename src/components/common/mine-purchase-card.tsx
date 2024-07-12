@@ -103,8 +103,8 @@ const MinePurchaseCard = ({ typeId }: Props) => {
     setBtnLabel("");
   };
   return (
-    <div className="bg-slate-800 rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
-      <div className="bg-[#A0AECB]">
+    <div className="bg-[#131924] rounded-xl overflow-hidden flex p-5 gap-6">
+      <div className="bg-[#A0AECB] w-[350px] rounded-xl">
         <Image
           src={`/imgs/mines/${typeId}.gif`}
           alt="mine"
@@ -113,23 +113,27 @@ const MinePurchaseCard = ({ typeId }: Props) => {
           className="w-full h-full"
         />
       </div>
-      <div className="p-6 flex flex-col gap-2">
-        <div className="text-[24px] text-center font-bold">
+      <div className="flex flex-col gap-2 grow bg-[#131924]">
+        <div className="text-[32px] text-center font-bold">
           {MineNames[typeId]}
         </div>
 
-        <div className="space-y-2 my-auto py-2">
-          <div className="flex justify-between">
-            <span>Price</span>
-            <span>{mineInfo.price} $FROST</span>
+        <div className="grid grid-cols-3 gap-5 my-auto">
+          <div className="flex items-center justify-between flex-col bg-[#191c2cb6] border-2 py-5 border-white/10 rounded-xl">
+            <span className="text-white/50">Price</span>
+            <span className="text-[24px] font-bold">
+              {mineInfo.price} $FROST
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span>Balance</span>
-            <span>{balance}</span>
+          <div className="flex justify-between flex-col items-center bg-[#191c2cb6] border-2 py-5 border-white/10 rounded-xl">
+            <span className="text-white/50">Balance</span>
+            <span className="text-[24px] font-bold">{balance}</span>
           </div>
-          <div className="flex justify-between">
-            <span>Available</span>
-            <span>{mineInfo.amountForSale}</span>
+          <div className="flex justify-between flex-col items-center bg-[#191c2cb6] border-2 py-5 border-white/10 rounded-xl">
+            <span className="text-white/50">Available</span>
+            <span className="text-[24px] font-bold">
+              {mineInfo.amountForSale}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2 mx-auto">
@@ -139,7 +143,7 @@ const MinePurchaseCard = ({ typeId }: Props) => {
             disabled={count === "" || Number(count) === 1}
             onClick={() => setCount(Math.max(1, Number(count) - 1) + "")}
           >
-            <Icon icon="ic:round-chevron-left" width={24} height={24} />
+            <Icon icon="ic:round-minus" width={24} height={24} />
           </Button>
           <Input
             type="number"
@@ -161,7 +165,7 @@ const MinePurchaseCard = ({ typeId }: Props) => {
               setCount(Math.min(mineInfo.amountForSale, Number(count) + 1) + "")
             }
           >
-            <Icon icon="ic:round-chevron-right" width={24} height={24} />
+            <Icon icon="ic:round-plus" width={24} height={24} />
           </Button>
         </div>
         <Button
