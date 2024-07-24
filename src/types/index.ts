@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 export enum AppModes {
   Production = "prod",
   Development = "dev",
@@ -36,4 +38,25 @@ export interface IMinerInfo {
   typeId: number;
   price: number;
   repairRate: number;
+}
+
+export interface IStakingPool {
+  poolAddress: Address;
+  poolName: string;
+  poolTokenAddress: Address;
+  lockAmount: number;
+  lockPeriod: number;
+  tokenSymbol: string;
+  tokenImage: string;
+}
+
+export interface IUserLock {
+  user: Address;
+  lockAmount: number;
+  startRoundId: number;
+  endRoundId: number;
+  lastClaimedRoundId: number;
+  isActive: boolean;
+  startTimestamp: number;
+  endTimestamp: number;
 }

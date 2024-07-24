@@ -3,6 +3,7 @@
 import { DependencyDelayTime } from "@/config/constants";
 import { useAppDispatch } from "@/store";
 import {
+  loadFrostStakingPoolsThunk,
   loadMineInfoThunk,
   loadMinerInfoThunk,
 } from "@/store/reducers/appReducer";
@@ -34,6 +35,7 @@ const Template = ({ children }: PropsWithChildren) => {
     const timerId = setTimeout(() => {
       dispatch(loadMineInfoThunk([]));
       dispatch(loadMinerInfoThunk());
+      dispatch(loadFrostStakingPoolsThunk());
     }, DependencyDelayTime);
 
     return () => clearTimeout(timerId);

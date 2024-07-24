@@ -1,12 +1,14 @@
 import { MinerTypeCount, MineTypeCount } from "@/config/constants";
+import { getFrostStakingPools } from "@/lib/contracts/frost-staking";
 import { getMineInfo } from "@/lib/contracts/mine";
 import { getMinerInfo } from "@/lib/contracts/miner";
-import { IMineInfo, IMinerInfo } from "@/types";
+import { IMineInfo, IMinerInfo, IStakingPool } from "@/types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export interface AppState {
   mineInfo: IMineInfo[];
   minerInfo: IMinerInfo[];
+  frostStakingPools: IStakingPool[];
 }
 
 const initialState: AppState = {
@@ -16,6 +18,7 @@ const initialState: AppState = {
   minerInfo: new Array(MinerTypeCount + 1)
     .fill(0)
     .map((_, i) => ({ price: 0, typeId: i, repairRate: 10 })),
+  frostStakingPools: [],
 };
 
 export const loadMinerInfoThunk = createAsyncThunk(
@@ -47,6 +50,18 @@ export const loadMineInfoThunk = createAsyncThunk(
   }
 );
 
+export const loadFrostStakingPoolsThunk = createAsyncThunk(
+  "loadFrostStakingPools",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getFrostStakingPools();
+    } catch (error) {
+      console.error("loadFrostStakingPools", error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
 export const appSlice = createSlice({
   name: "app",
   initialState,
@@ -61,6 +76,10 @@ export const appSlice = createSlice({
     builder.addCase(loadMinerInfoThunk.fulfilled, (state, action) => {
       state.minerInfo = action.payload;
     });
+
+    builder.addCase(loadFrostStakingPoolsThunk.fulfilled, (state, action) => {
+      state.frostStakingPools = action.payload;
+    })
   },
 });
 

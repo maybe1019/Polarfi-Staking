@@ -7,11 +7,14 @@ import {
   getStakedTokenIdsOf,
   getStakePositions,
 } from "@/lib/contracts/staking";
-import { IStakePosition } from "@/types";
+import { IStakePosition, IUserLock } from "@/types";
 import { LoadingStatus } from "@/types/enums";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "..";
 import { getMinerBalancesOf } from "@/lib/contracts/miner";
+import { Address } from "viem";
+import { ContractABIs } from "@/config/constants";
+import { getFrostStakingUserLocks } from "@/lib/contracts/frost-staking-pool";
 
 export interface UserState {
   value: number;
@@ -25,6 +28,10 @@ export interface UserState {
   };
   stakePositions: {
     data: IStakePosition[];
+    status: LoadingStatus;
+  };
+  userLocks: {
+    data: IUserLock[];
     status: LoadingStatus;
   };
 }
@@ -43,7 +50,30 @@ const initialState: UserState = {
     data: [],
     status: LoadingStatus.NotStarted,
   },
+  userLocks: {
+    data: [],
+    status: LoadingStatus.NotStarted,
+  },
 };
+
+export const loadFrostStakingUserLocksThunk = createAsyncThunk(
+  "loadFrostStakingUserLocksThunk",
+  async (
+    { address, poolAddresses }: { address?: Address; poolAddresses: Address[] },
+    { rejectWithValue, dispatch }
+  ) => {
+    if (!address) {
+      return [] as IUserLock[];
+    }
+    try {
+      const userLocks = await getFrostStakingUserLocks(address, poolAddresses);
+      return userLocks;
+    } catch (error) {
+      console.error("loadFrostStakingUserLocksThunk", error);
+      return rejectWithValue(error);
+    }
+  }
+);
 
 export const loadUserStakePositionsThunk = createAsyncThunk(
   "loadUserStakePositionsThunk",
@@ -210,6 +240,13 @@ export const userSlice = createSlice({
           state.stakePositions.data.push(s);
         });
       });
+
+    builder.addCase(
+      loadFrostStakingUserLocksThunk.fulfilled,
+      (state, action) => {
+        state.userLocks.data = action.payload;
+      }
+    );
   },
 });
 

@@ -6,6 +6,8 @@ import MineABI from "@/assets/abis/mine.json";
 import MinerABI from "@/assets/abis/miner.json";
 import StakingABI from "@/assets/abis/staking.json";
 import ERC20ABI from "@/assets/abis/erc20.json";
+import FrostStakingABI from "@/assets/abis/frost-staking.json";
+import FrostStakingPoolABI from "@/assets/abis/frost-staking-pool.json";
 
 export const AppMode: AppModes = (process.env.NEXT_PUBLIC_APP_MODE ||
   AppModes.Development) as AppModes;
@@ -17,6 +19,7 @@ export const ContractAddresses = {
   Mine: process.env.NEXT_PUBLIC_MINE_ADDRESS as Address,
   Miner: process.env.NEXT_PUBLIC_MINER_ADDRESS as Address,
   Staking: process.env.NEXT_PUBLIC_STAKING_ADDRESS as Address,
+  FrostStaking: process.env.NEXT_PUBLIC_FROST_STAKING_ADDRESS as Address,
 };
 
 export const ContractABIs = {
@@ -25,6 +28,8 @@ export const ContractABIs = {
   Miner: MinerABI,
   Staking: StakingABI,
   ERC20: ERC20ABI,
+  FrostStaking: FrostStakingABI,
+  FrostStakingPool: FrostStakingPoolABI,
 };
 
 export const DependencyDelayTime = 200;

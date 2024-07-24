@@ -9,6 +9,10 @@ export const Links = [
   },
   {
     label: "Staking",
-    href: "staking",
+    href: "/staking",
+  },
+  {
+    label: "Frost Staking",
+    href: "/frost",
   },
 ];
